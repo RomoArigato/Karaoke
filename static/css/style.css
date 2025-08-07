@@ -473,6 +473,16 @@ body {
   visibility: visible;
 }
 
+/* New styles for the now-playing title fade out */
+#now-playing-title {
+  transition: opacity 1.5s ease-in-out;
+  min-height: 4rem; /* Prevents lyrics from jumping up */
+}
+
+#now-playing-title.fade-out {
+  opacity: 0;
+}
+
 #lyrics-display {
   display: flex;
   justify-content: center;
@@ -481,7 +491,6 @@ body {
   text-align: center;
   font-size: 2.8rem;
   line-height: 1.4;
-  margin-bottom: 2rem;
   width: 90%;
   max-width: 900px;
   font-weight: 700;

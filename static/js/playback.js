@@ -91,7 +91,14 @@ export async function playFirstSongInQueue(
   stopPlayback(karaokeScreen, mainContent);
 
   const songToPlay = currentQueue[0];
-  nowPlayingTitle.textContent = `Now Playing: "${songToPlay.song_name}" by ${songToPlay.artist}`;
+
+  // Make sure title is visible, set the text, then schedule it to fade out
+  nowPlayingTitle.classList.remove("fade-out");
+  nowPlayingTitle.textContent = `"${songToPlay.song_name}" by ${songToPlay.artist}`;
+  setTimeout(() => {
+    nowPlayingTitle.classList.add("fade-out");
+  }, 4000); // Fade out after 4 seconds
+
   lyricsDisplay.innerHTML = "";
 
   mainContent.style.display = "none";
@@ -177,6 +184,13 @@ export function stopPlayback(karaokeScreen, mainContent) {
   }
   currentLyricLineIndex = 0;
   lyricsLines = [];
+
+  // Reset the title's visibility when stopping playback
+  const nowPlayingTitle = document.getElementById("now-playing-title");
+  if (nowPlayingTitle) {
+    nowPlayingTitle.classList.remove("fade-out");
+  }
+
   karaokeScreen.classList.remove("show");
   mainContent.style.display = "flex";
 }
