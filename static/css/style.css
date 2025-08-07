@@ -1,0 +1,600 @@
+body {
+  font-family: "Inter", sans-serif;
+  background-color: #1a202c; /* Dark background for a sleek look */
+  color: #e2e8f0; /* Light text color */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  box-sizing: border-box;
+  flex-direction: column; /* flex-col */
+  padding: 1rem; /* p-4 */
+}
+
+@media (min-width: 768px) {
+  body {
+    flex-direction: row; /* md:flex-row */
+    padding: 2rem; /* md:p-8 */
+  }
+}
+
+/* Main Content Container Layout */
+#main-content {
+  display: flex;
+  flex-direction: column; /* flex-col */
+  width: 100%; /* w-full */
+  max-width: 72rem; /* max-w-6xl */
+  gap: 2rem; /* space-y-8 (approx) */
+  align-items: center; /* items-center */
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  #main-content {
+    flex-direction: row; /* md:flex-row */
+    gap: 3rem; /* md:space-x-12 (approx) */
+  }
+}
+
+/* Responsive avatar visibility */
+.avatar-container {
+  display: none; /* hidden */
+  flex-shrink: 0; /* flex-shrink-0 */
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .avatar-container {
+    display: flex;
+  }
+}
+
+.avatar-box {
+  width: 16rem; /* w-64 */
+  height: 16rem; /* h-64 */
+  background-color: #4a5568; /* bg-gray-700 */
+  border-radius: 9999px; /* rounded-full */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* overflow-hidden */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+  border-width: 4px; /* border-4 */
+  border-color: #8b5cf6; /* border-purple-500 */
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 768px) {
+  .avatar-box {
+    width: 20rem; /* md:w-80 */
+    height: 20rem; /* md:h-80 */
+  }
+}
+
+.avatar-text {
+  margin-top: 1rem; /* mt-4 */
+  text-align: center; /* text-center */
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 600; /* font-semibold */
+  color: #d1d5db; /* text-gray-300 */
+}
+
+/* Button Section Layout */
+#button-section {
+  display: flex;
+  flex-direction: column; /* flex-col */
+  width: 100%; /* w-full */
+  gap: 1.5rem; /* space-y-6 */
+  align-items: center; /* items-center */
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  #button-section {
+    width: auto; /* md:w-auto */
+    gap: 2rem; /* md:space-y-8 */
+  }
+}
+
+/* Custom button styles for a more engaging feel */
+.karaoke-button {
+  background-image: linear-gradient(
+    to right,
+    #6366f1,
+    #8b5cf6,
+    #ec4899
+  ); /* Gradient background */
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.2);
+  border: none;
+  padding: 1rem 2rem; /* py-4 px-8 */
+  border-radius: 9999px; /* rounded-full */
+  color: white; /* text-white */
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700; /* font-bold */
+  text-transform: uppercase; /* uppercase */
+  letter-spacing: 0.05em; /* tracking-wider */
+  width: 100%; /* w-full */
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .karaoke-button {
+    width: 24rem; /* md:w-96 */
+  }
+}
+
+.karaoke-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.3);
+  background-image: linear-gradient(to left, #6366f1, #8b5cf6, #ec4899);
+}
+
+.karaoke-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);
+}
+
+.karaoke-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.5);
+}
+
+/* Smaller buttons for modals */
+.karaoke-button-small {
+  padding: 0.75rem 1.5rem; /* py-3 px-6 */
+  font-size: 1.25rem; /* text-xl */
+  border-radius: 0.5rem; /* rounded-md */
+  text-transform: none;
+  font-weight: 600;
+  background-image: linear-gradient(to right, #4f46e5, #7c3aed);
+  cursor: pointer;
+  border: none;
+  color: white;
+  transition: all 0.2s ease;
+}
+.karaoke-button-small:hover {
+  background-image: linear-gradient(to right, #4338ca, #6d28d9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.karaoke-button-margin-top-8 {
+  margin-top: 2rem; /* mt-8 */
+}
+
+.karaoke-button-margin-top-4 {
+  margin-top: 1rem; /* mt-4 */
+}
+
+/* Main titles for sections */
+.section-title {
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 800; /* font-extrabold */
+  color: white; /* text-white */
+  text-align: center; /* text-center */
+  margin-bottom: 1.5rem; /* mb-6 */
+}
+
+@media (min-width: 768px) {
+  .section-title {
+    font-size: 3rem; /* md:text-5xl */
+  }
+}
+
+/* List item general styles */
+.list-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem; /* py-3 px-4 */
+  border-bottom: 1px solid #4a5568; /* Darker border for separation */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+  color: #e2e8f0; /* text-gray-200 */
+}
+
+.list-item:hover {
+  background-color: #2d3748; /* Darker hover background */
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+/* Specific styling for queue list items to ensure column alignment */
+.queue-list-item {
+  justify-content: flex-start;
+}
+
+/* Styling for the song/artist text within list items */
+.list-item > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 0.5rem; /* pr-2 */
+}
+
+/* Style for the "Add to Queue" button (in manual search) */
+.add-to-queue-btn {
+  background-color: #4caf50; /* Green background */
+  color: white;
+  border: none;
+  border-radius: 9999px; /* Fully rounded */
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 600; /* font-semibold */
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  display: none; /* Hidden by default */
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.add-to-queue-btn:hover {
+  background-color: #45a049; /* Darker green on hover */
+  transform: translateY(-50%) scale(1.05); /* Slightly larger on hover */
+}
+
+/* Show the button when the parent list-item is hovered */
+.list-item:hover .add-to-queue-btn {
+  display: flex;
+}
+
+/* Toast notification styles */
+.toast-notification {
+  position: fixed;
+  right: 1.5rem;
+  background-color: rgba(34, 197, 94, 0.9); /* Green-500 with opacity */
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(20px); /* Start slightly lower */
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out,
+    bottom 0.3s ease-in-out;
+  z-index: 1000;
+  font-weight: 600;
+  pointer-events: none; /* Prevent clicks when hidden */
+}
+
+.toast-notification.show {
+  opacity: 1;
+  transform: translateY(0); /* Move to final position */
+  pointer-events: auto; /* Allow clicks when visible */
+}
+
+/* Style for the "Remove from Queue" button */
+.remove-from-queue-btn {
+  background-color: #ef4444; /* Red-500 */
+  color: white;
+  border: none;
+  border-radius: 9999px; /* Fully rounded */
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.remove-from-queue-btn:hover {
+  background-color: #dc2626; /* Red-600 on hover */
+  transform: scale(1.1);
+}
+
+/* Modal Overlay Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7); /* Dark semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  padding: 1rem; /* p-4 */
+}
+
+.modal-overlay.show-modal {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content-box {
+  background-color: #1f2937; /* Darker background for the modal box */
+  border-radius: 0.75rem; /* rounded-lg */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  padding: 2rem;
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; /* w-full */
+}
+
+@media (min-width: 768px) {
+  .modal-content-box {
+    max-width: 48rem; /* md:max-w-2xl */
+  }
+}
+
+/* Modal specific list container */
+.modal-list-wrapper {
+  width: 100%; /* w-full */
+  background-color: #2d3748; /* bg-gray-800 */
+  border-radius: 0.5rem; /* rounded-lg */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-xl */
+  overflow: hidden; /* overflow-hidden */
+  margin-top: 1.5rem;
+  min-height: 10rem; /* Give it a minimum height */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal list header */
+.modal-list-header {
+  padding: 1rem; /* p-4 */
+  background-color: #4a5568; /* bg-gray-700 */
+  color: #d1d5db; /* text-gray-300 */
+  font-weight: 600; /* font-semibold */
+  font-size: 1.125rem; /* text-lg */
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Modal list items */
+.modal-list-ul {
+  border-top: 1px solid #4a5568; /* divide-y divide-gray-700 */
+  max-height: 24rem; /* max-h-96 */
+  overflow-y: auto; /* overflow-y-auto */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Specific column widths for queue items within the list */
+.queue-song-col {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 0.5rem;
+}
+
+.queue-duration-col {
+  width: 6rem;
+  text-align: right;
+  padding-right: 0.5rem;
+}
+
+.queue-remove-col-placeholder {
+  width: 2rem;
+  margin-left: 0.5rem;
+}
+
+/* Artist Detail View Styles */
+.artist-detail-container {
+  display: none; /* Hidden by default */
+  flex-direction: column; /* Default to column for mobile */
+  width: 100%;
+  gap: 1.5rem; /* Gap between image and list */
+  align-items: flex-start; /* Align items to start in column layout */
+}
+
+@media (min-width: 768px) {
+  .artist-detail-container {
+    flex-direction: row; /* Row for desktop */
+    align-items: flex-start; /* Align items to start in row layout */
+  }
+}
+
+.artist-image-wrapper {
+  flex-shrink: 0; /* Prevent image from shrinking */
+  width: 100%; /* Full width on mobile */
+  max-width: 12rem; /* Max width for image on mobile */
+  height: 12rem; /* Fixed height for image */
+  overflow: hidden;
+  border-radius: 0.5rem; /* rounded-lg */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #374151; /* Placeholder background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .artist-image-wrapper {
+    width: 12rem; /* Fixed width for desktop */
+    height: 12rem; /* Fixed height for desktop */
+  }
+}
+
+.artist-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover the container */
+}
+
+.artist-songs-list-wrapper {
+  flex-grow: 1; /* Take remaining space */
+  width: 100%; /* Full width on mobile */
+}
+
+/* Karaoke Playing Screen Styles */
+#karaoke-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000; /* Black background for karaoke */
+  color: #fff; /* White text */
+  display: none; /* Hidden by default */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  z-index: 100; /* Above everything else */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+#karaoke-screen.show {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+}
+
+#lyrics-display {
+  white-space: pre-wrap; /* Preserve whitespace and wrap text */
+  text-align: center;
+  font-size: 2.5rem; /* Large font for lyrics */
+  line-height: 1.5;
+  max-height: 80%; /* Limit height to prevent overflow */
+  overflow-y: auto; /* Enable scrolling for long lyrics */
+  margin-bottom: 2rem;
+  width: 90%;
+  max-width: 800px; /* Max width for readability */
+  font-weight: 600;
+  color: #a0aec0; /* Default lyric color (gray) */
+}
+
+/* NEW: Styles for highlighted words and lines */
+.highlighted-word {
+  color: #f6e05e; /* Bright yellow for the current word */
+  font-weight: 800;
+  transition: color 0.2s ease;
+}
+
+.highlighted-line {
+  color: #e2e8f0; /* Lighter gray/white for completed lines/words */
+  transition: color 0.3s ease;
+}
+
+.karaoke-screen-button {
+  background-image: linear-gradient(
+    to right,
+    #ef4444,
+    #dc2626
+  ); /* Red gradient for stop button */
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.2);
+  border: none;
+  padding: 0.75rem 1.5rem; /* py-3 px-6 */
+  border-radius: 9999px; /* rounded-full */
+  color: white; /* text-white */
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700; /* font-bold */
+  text-transform: uppercase; /* uppercase */
+  letter-spacing: 0.05em; /* tracking-wider */
+  margin-top: 1rem; /* Space from lyrics */
+  cursor: pointer;
+}
+
+.karaoke-screen-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.3);
+  background-image: linear-gradient(to left, #ef4444, #dc2626);
+}
+
+.karaoke-screen-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);
+}
+
+.karaoke-screen-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.5);
+}
+
+/* NEW: AI Search Modal Styles */
+.ai-search-description {
+  color: #a0aec0; /* text-gray-400 */
+  text-align: center;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.ai-search-input-wrapper {
+  display: flex;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+#ai-search-input {
+  flex-grow: 1;
+  background-color: #2d3748; /* bg-gray-800 */
+  border: 1px solid #4a5568; /* border-gray-600 */
+  color: #e2e8f0; /* text-gray-200 */
+  border-radius: 0.5rem; /* rounded-md */
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}
+
+#ai-search-input:focus {
+  outline: none;
+  border-color: #8b5cf6; /* focus:border-purple-500 */
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4);
+}
+
+/* NEW: Loading Spinner Styles */
+.loading-spinner-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #a0aec0;
+  padding: 2rem;
+  flex-grow: 1;
+}
+
+.loading-spinner {
+  border: 4px solid #4a5568; /* border-gray-600 */
+  border-top: 4px solid #8b5cf6; /* border-purple-500 */
+  border-radius: 50%;
+  width: 3rem; /* w-12 */
+  height: 3rem; /* h-12 */
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.hidden {
+  display: none !important;
+}

@@ -1,0 +1,154 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Karaoke App</title>
+    <!-- Tailwind CSS is not used, but the placeholder is kept for context -->
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="./css/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Main Content Container -->
+    <div id="main-content">
+      <!-- Avatar Section -->
+      <div class="avatar-container">
+        <div class="avatar-box">
+          <img
+            src="https://placehold.co/250x250/4a5568/e2e8f0?text=🎤"
+            alt="Karaoke Avatar"
+            class="avatar-image"
+          />
+        </div>
+        <p class="avatar-text">Ready to Sing!</p>
+      </div>
+
+      <!-- Buttons Section -->
+      <div id="button-section">
+        <h1 class="section-title">AI Karaoke</h1>
+        <button id="start-playlist-btn" class="karaoke-button">
+          Start Playlist
+        </button>
+        <button id="manual-search-btn" class="karaoke-button">
+          Manual Search
+        </button>
+        <!-- AI Search Button -->
+        <button id="ai-search-btn" class="karaoke-button">AI Search</button>
+        <button id="queue-btn" class="karaoke-button">Queue</button>
+      </div>
+    </div>
+
+    <!-- Song Queue Modal -->
+    <div id="song-queue-section" class="modal-overlay">
+      <div class="modal-content-box">
+        <h2 class="section-title">Current Queue</h2>
+        <div class="modal-list-wrapper">
+          <div class="modal-list-header">
+            <span class="queue-song-col">Song / Artist</span>
+            <span class="queue-duration-col">Duration</span>
+            <span class="queue-remove-col-placeholder"></span>
+          </div>
+          <ul id="queue-song-list" class="modal-list-ul">
+            <!-- Songs will be dynamically inserted here -->
+          </ul>
+        </div>
+        <button
+          id="back-to-home-from-queue-btn"
+          class="karaoke-button karaoke-button-small karaoke-button-margin-top-8"
+        >
+          Back to Home
+        </button>
+      </div>
+    </div>
+
+    <!-- Manual Search Modal -->
+    <div id="manual-search-section" class="modal-overlay">
+      <div class="modal-content-box">
+        <h2 id="manual-search-title" class="section-title">Artists</h2>
+        <div id="artist-list-container" class="modal-list-wrapper">
+          <ul id="artist-list" class="modal-list-ul">
+            <!-- Artists will be dynamically inserted here -->
+          </ul>
+        </div>
+        <div id="artist-detail-container" class="artist-detail-container">
+          <div id="artist-image-wrapper" class="artist-image-wrapper"></div>
+          <div
+            id="artist-songs-list-wrapper"
+            class="artist-songs-list-wrapper modal-list-wrapper"
+          >
+            <ul id="artist-songs-list" class="modal-list-ul"></ul>
+          </div>
+        </div>
+        <button
+          id="back-to-artists-btn"
+          class="karaoke-button karaoke-button-small karaoke-button-margin-top-8 hidden"
+        >
+          Back to Artists
+        </button>
+        <button
+          id="back-to-home-from-manual-btn"
+          class="karaoke-button karaoke-button-small karaoke-button-margin-top-4"
+        >
+          Back to Home
+        </button>
+      </div>
+    </div>
+
+    <!-- AI Search Modal (NEW) -->
+    <div id="ai-search-section" class="modal-overlay">
+      <div class="modal-content-box">
+        <h2 class="section-title">AI Song Search</h2>
+        <p class="ai-search-description">
+          Describe the kind of song you want to sing!
+          <br />
+          (e.g., "80s power ballad" or "a song that feels like summer")
+        </p>
+        <div class="ai-search-input-wrapper">
+          <input
+            type="text"
+            id="ai-search-input"
+            placeholder="Enter your vibe..."
+          />
+          <button id="ai-search-submit-btn" class="karaoke-button-small">
+            Search
+          </button>
+        </div>
+
+        <div id="ai-search-results-wrapper" class="modal-list-wrapper">
+          <!-- Loading spinner will appear here -->
+          <div id="ai-loading-spinner" class="loading-spinner-container hidden">
+            <div class="loading-spinner"></div>
+            <p>Finding your perfect song...</p>
+          </div>
+          <ul id="ai-search-results-list" class="modal-list-ul">
+            <!-- AI generated song results will be inserted here -->
+          </ul>
+        </div>
+
+        <button
+          id="back-to-home-from-ai-btn"
+          class="karaoke-button karaoke-button-small karaoke-button-margin-top-8"
+        >
+          Back to Home
+        </button>
+      </div>
+    </div>
+
+    <!-- Karaoke Playing Screen -->
+    <div id="karaoke-screen">
+      <h2 id="now-playing-title" class="section-title"></h2>
+      <pre id="lyrics-display"></pre>
+      <button id="stop-playing-btn" class="karaoke-screen-button">
+        Stop Playing
+      </button>
+    </div>
+
+    <script type="module" src="./js/app.js"></script>
+    <script type="module" src="./js/playback.js"></script>
+  </body>
+</html>
