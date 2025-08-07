@@ -9,6 +9,11 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <!-- QR Code Generator Library -->
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"
+    ></script>
   </head>
   <body>
     <!-- Main Content Container -->
@@ -144,6 +149,9 @@
         Stop Playing
       </button>
     </div>
+
+    <!-- QR Code Container -->
+    <div id="qr-code-container"></div>
 
     <script type="module" src="/static/js/app.js"></script>
     <script type="module" src="/static/js/playback.js"></script>

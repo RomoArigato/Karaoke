@@ -470,3 +470,31 @@ aiSearchInput.addEventListener("keydown", (e) => {
 stopPlayingButton.addEventListener("click", () => {
   stopPlayback(karaokeScreen, mainContent);
 });
+
+// --- QR CODE GENERATION ---
+window.addEventListener("load", () => {
+  try {
+    const qrContainer = document.getElementById("qr-code-container");
+    if (qrContainer) {
+      // Type 4 QR code, error correction level 'L'
+      // The qrcode library is available globally from the script tag in index.html
+      const qr = qrcode(4, "L");
+      qr.addData(window.location.href);
+      qr.make();
+      // createImgTag(cellSize, margin)
+      qrContainer.innerHTML = qr.createImgTag(4, 8);
+      // Style the generated image
+      const qrImg = qrContainer.querySelector("img");
+      if (qrImg) {
+        qrImg.style.width = "100px";
+        qrImg.style.height = "100px";
+      }
+    }
+  } catch (error) {
+    console.error("Could not generate QR code:", error);
+    const qrContainer = document.getElementById("qr-code-container");
+    if (qrContainer) {
+      qrContainer.style.display = "none";
+    }
+  }
+});
