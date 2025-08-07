@@ -474,29 +474,52 @@ body {
 }
 
 #lyrics-display {
-  white-space: pre-wrap; /* Preserve whitespace and wrap text */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 30vh;
   text-align: center;
-  font-size: 2.5rem; /* Large font for lyrics */
-  line-height: 1.5;
-  max-height: 80%; /* Limit height to prevent overflow */
-  overflow-y: auto; /* Enable scrolling for long lyrics */
+  font-size: 2.8rem;
+  line-height: 1.4;
   margin-bottom: 2rem;
   width: 90%;
-  max-width: 800px; /* Max width for readability */
-  font-weight: 600;
-  color: #a0aec0; /* Default lyric color (gray) */
+  max-width: 900px;
+  font-weight: 700;
+  color: #a0aec0;
 }
 
-/* NEW: Styles for highlighted words and lines */
-.highlighted-word {
-  color: #f6e05e; /* Bright yellow for the current word */
-  font-weight: 800;
-  transition: color 0.2s ease;
+/* The container for the animated lyric line */
+.lyric-line {
+  position: relative;
+  white-space: nowrap;
+  color: #a0aec0; /* Base color */
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
 }
 
-.highlighted-line {
-  color: #e2e8f0; /* Lighter gray/white for completed lines/words */
-  transition: color 0.3s ease;
+/* The animated "wipe" effect using a pseudo-element */
+.lyric-line::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #f6e05e; /* Bright yellow for highlighted text */
+  overflow: hidden;
+  width: 0; /* Start with no width */
+  animation-name: run-text;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards; /* Stay at 100% width when done */
+  text-shadow: 0 0 4px rgba(246, 224, 94, 0.6);
+  white-space: nowrap;
+}
+
+/* The animation that grows the width of the ::after element */
+@keyframes run-text {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 .karaoke-screen-button {
@@ -535,7 +558,7 @@ body {
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.5);
 }
 
-/* NEW: AI Search Modal Styles */
+/* AI Search Modal Styles */
 .ai-search-description {
   color: #a0aec0; /* text-gray-400 */
   text-align: center;
@@ -565,7 +588,7 @@ body {
   box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4);
 }
 
-/* NEW: Loading Spinner Styles */
+/* Loading Spinner Styles */
 .loading-spinner-container {
   display: flex;
   flex-direction: column;

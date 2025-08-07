@@ -2,8 +2,7 @@
 let currentAudio = null;
 let lyricHighlightTimeout = null;
 let currentLyricLineIndex = 0;
-let currentWordIndex = 0;
-let lyricsLines = []; // Array of { time: number, words: string[] }
+let lyricsLines = []; // Array of arrays of words
 
 /**
  * Fetches and parses lyrics from a given path.
@@ -29,76 +28,45 @@ async function fetchLyrics(path) {
 }
 
 /**
- * Updates the lyrics display with highlighting and scrolling.
- * @param {HTMLElement} lyricsDisplay - The element to display the lyrics.
- */
-function updateLyricsDisplay(lyricsDisplay) {
-  if (lyricsLines.length === 0) {
-    lyricsDisplay.innerHTML = "Lyrics not available.";
-    return;
-  }
-
-  let htmlContent = "";
-  lyricsLines.forEach((lineWords, lineIndex) => {
-    let lineHtml = "";
-    lineWords.forEach((word, wordIndex) => {
-      if (lineIndex < currentLyricLineIndex) {
-        lineHtml += `<span class="highlighted-line">${word}</span> `;
-      } else if (lineIndex === currentLyricLineIndex) {
-        if (wordIndex < currentWordIndex) {
-          lineHtml += `<span class="highlighted-line">${word}</span> `;
-        } else if (wordIndex === currentWordIndex) {
-          lineHtml += `<span class="highlighted-word">${word}</span> `;
-        } else {
-          lineHtml += `${word} `;
-        }
-      } else {
-        lineHtml += `${word} `;
-      }
-    });
-    htmlContent += `${lineHtml.trim()}<br>`;
-  });
-  lyricsDisplay.innerHTML = htmlContent;
-
-  // Scroll to the highlighted line
-  const activeWordElement = lyricsDisplay.querySelector(".highlighted-word");
-  if (activeWordElement) {
-    const containerHeight = lyricsDisplay.clientHeight;
-    const spanOffsetTop = activeWordElement.offsetTop;
-    const spanHeight = activeWordElement.offsetHeight;
-    lyricsDisplay.scrollTop =
-      spanOffsetTop - containerHeight / 2 + spanHeight / 2;
-  }
-}
-
-/**
- * Simulates the karaoke word highlighting progression.
+ * Simulates the karaoke highlighting effect line by line with a wipe animation.
  * @param {HTMLElement} lyricsDisplay - The element to display the lyrics.
  */
 function startLyricHighlighting(lyricsDisplay) {
   if (lyricHighlightTimeout) clearTimeout(lyricHighlightTimeout);
 
-  const advanceWord = () => {
+  const advanceLine = () => {
     if (currentLyricLineIndex >= lyricsLines.length) {
       clearTimeout(lyricHighlightTimeout);
+      lyricsDisplay.innerHTML = "";
       return;
     }
 
     const currentLineWords = lyricsLines[currentLyricLineIndex];
-    if (currentWordIndex < currentLineWords.length) {
-      updateLyricsDisplay(lyricsDisplay);
-      currentWordIndex++;
-      // This duration can be made dynamic based on song beatmap in the future
-      lyricHighlightTimeout = setTimeout(advanceWord, 350);
-    } else {
-      currentLyricLineIndex++;
-      currentWordIndex = 0;
-      updateLyricsDisplay(lyricsDisplay);
-      // Pause slightly longer between lines
-      lyricHighlightTimeout = setTimeout(advanceWord, 800);
-    }
+    const lineText = currentLineWords.join(" ");
+
+    const averageWordDuration = 450; // ms per word
+    const pauseBetweenLines = 800; // ms pause
+    const lineDurationMs = currentLineWords.length * averageWordDuration;
+
+    lyricsDisplay.innerHTML = `<p class="lyric-line" data-text="${lineText}">${lineText}</p>`;
+
+    const lineElement = lyricsDisplay.querySelector(".lyric-line");
+
+    // Use requestAnimationFrame to ensure the element is painted before we apply the animation
+    requestAnimationFrame(() => {
+      if (lineElement) {
+        lineElement.style.animationDuration = `${lineDurationMs / 1000}s`;
+      }
+    });
+
+    currentLyricLineIndex++;
+    lyricHighlightTimeout = setTimeout(
+      advanceLine,
+      lineDurationMs + pauseBetweenLines
+    );
   };
-  advanceWord();
+
+  advanceLine();
 }
 
 /**
@@ -120,11 +88,11 @@ export async function playFirstSongInQueue(
     return;
   }
 
-  stopPlayback(karaokeScreen, mainContent); // Stop any previous playback
+  stopPlayback(karaokeScreen, mainContent);
 
   const songToPlay = currentQueue[0];
   nowPlayingTitle.textContent = `Now Playing: "${songToPlay.song_name}" by ${songToPlay.artist}`;
-  lyricsDisplay.textContent = "Loading lyrics...";
+  lyricsDisplay.innerHTML = "";
 
   mainContent.style.display = "none";
   songQueueSection.classList.remove("show-modal");
@@ -133,13 +101,11 @@ export async function playFirstSongInQueue(
 
   lyricsLines = await fetchLyrics(songToPlay.lyrics_path);
   currentLyricLineIndex = 0;
-  currentWordIndex = 0;
 
   if (lyricsLines.length > 0) {
-    updateLyricsDisplay(lyricsDisplay);
     startLyricHighlighting(lyricsDisplay);
   } else {
-    lyricsDisplay.textContent = "Lyrics not available for this song.";
+    lyricsDisplay.innerHTML = "<p>Lyrics not available for this song.</p>";
   }
 
   currentAudio = new Audio(songToPlay.audio_path);
@@ -210,7 +176,6 @@ export function stopPlayback(karaokeScreen, mainContent) {
     lyricHighlightTimeout = null;
   }
   currentLyricLineIndex = 0;
-  currentWordIndex = 0;
   lyricsLines = [];
   karaokeScreen.classList.remove("show");
   mainContent.style.display = "flex";

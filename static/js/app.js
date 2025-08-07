@@ -140,7 +140,7 @@ const backToHomeFromManualButton = document.getElementById(
   "back-to-home-from-manual-btn"
 );
 
-// AI Search Section (NEW)
+// AI Search Section
 const aiSearchButton = document.getElementById("ai-search-btn");
 const aiSearchSection = document.getElementById("ai-search-section");
 const aiSearchInput = document.getElementById("ai-search-input");
@@ -180,7 +180,7 @@ function showToast(message, isError = false) {
   });
   toast.style.bottom = `${bottomOffset}px`;
 
-  // Animate in
+  // Animate in - using requestAnimationFrame to ensure transition happens
   requestAnimationFrame(() => {
     toast.classList.add("show");
   });
@@ -312,7 +312,6 @@ function showArtistDetail(artistName) {
   });
 }
 
-// NEW: Function to populate AI search results
 function populateAiSearchResults(songs) {
   aiSearchResultsList.innerHTML = ""; // Clear previous results
   if (songs.length === 0) {
@@ -330,7 +329,7 @@ function populateAiSearchResults(songs) {
   });
 }
 
-// --- AI SEARCH LOGIC (NEW) ---
+// --- AI SEARCH LOGIC ---
 async function handleAiSearch() {
   const userPrompt = aiSearchInput.value.trim();
   if (!userPrompt) {
@@ -440,7 +439,6 @@ manualSearchButton.addEventListener("click", () => {
   populateArtistList();
 });
 
-// NEW: AI Search Button
 aiSearchButton.addEventListener("click", () => {
   aiSearchSection.classList.add("show-modal");
   aiSearchInput.focus();
@@ -457,7 +455,6 @@ backToHomeFromManualButton.addEventListener("click", () => {
 
 backToArtistsButton.addEventListener("click", populateArtistList);
 
-// NEW: AI Modal Buttons
 backToHomeFromAiButton.addEventListener("click", () => {
   aiSearchSection.classList.remove("show-modal");
 });

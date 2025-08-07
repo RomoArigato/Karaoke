@@ -1,13 +1,10 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Karaoke App</title>
-    <!-- Tailwind CSS is not used, but the placeholder is kept for context -->
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="/static/css/style.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
@@ -99,7 +96,7 @@
       </div>
     </div>
 
-    <!-- AI Search Modal (NEW) -->
+    <!-- AI Search Modal -->
     <div id="ai-search-section" class="modal-overlay">
       <div class="modal-content-box">
         <h2 class="section-title">AI Song Search</h2>
@@ -142,13 +139,13 @@
     <!-- Karaoke Playing Screen -->
     <div id="karaoke-screen">
       <h2 id="now-playing-title" class="section-title"></h2>
-      <pre id="lyrics-display"></pre>
+      <div id="lyrics-display"></div>
       <button id="stop-playing-btn" class="karaoke-screen-button">
         Stop Playing
       </button>
     </div>
 
-    <script type="module" src="./js/app.js"></script>
-    <script type="module" src="./js/playback.js"></script>
+    <script type="module" src="/static/js/app.js"></script>
+    <script type="module" src="/static/js/playback.js"></script>
   </body>
 </html>
