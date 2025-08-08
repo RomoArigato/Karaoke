@@ -6,7 +6,6 @@ const API_BASE_URL = "";
 // --- DATA ---
 let fakeSongs = [];
 let currentQueue = [];
-// We need to define artistImages here so showArtistDetail can access it.
 const artistImages = {
   Dreamweavers: "assets/images/dreamweavers.jpg",
   "Synthwave Collective": "assets/images/synthwave_collective.jpg",
@@ -220,11 +219,9 @@ function showArtistDetail(artistName) {
   artistDetailContainer.style.display = "flex";
   backToArtistsButton.classList.remove("hidden");
 
-  // Populate image
   artistImageWrapper.innerHTML = "";
   const img = document.createElement("img");
 
-  // *** FIX: Prepend the path with '/static/' to create the correct URL ***
   const imagePath = artistImages[artistName]
     ? `/static/${artistImages[artistName]}`
     : `https://placehold.co/200x200/374151/d1d5db?text=${artistName.charAt(0)}`;
@@ -236,7 +233,6 @@ function showArtistDetail(artistName) {
   };
   artistImageWrapper.appendChild(img);
 
-  // Populate songs
   artistSongsList.innerHTML = "";
   const songsByArtist = fakeSongs.filter((song) => song.artist === artistName);
   songsByArtist.forEach((song) => {
@@ -313,9 +309,12 @@ window.addEventListener("load", async () => {
     const qrContainer = document.getElementById("qr-code-container");
     if (qrContainer) {
       const qr = qrcode(4, "L");
-      // This should point to your computer's IP on the current network
-      const serverUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
-      qr.addData(serverUrl);
+
+      // *** IMPORTANT: Replace this placeholder with your actual localtunnel URL. ***
+      // It should look like: https://your-subdomain.loca.lt
+      const tunnelUrl = "https://<YOUR_LOCALTUNNEL_URL_HERE>";
+
+      qr.addData(tunnelUrl);
       qr.make();
       qrContainer.innerHTML = qr.createImgTag(4, 8);
       const qrImg = qrContainer.querySelector("img");
