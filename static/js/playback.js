@@ -7,6 +7,7 @@ let lyricHighlightTimeout = null;
 let titleFadeTimeout = null;
 let currentLyricLineIndex = 0;
 let lyricsLines = [];
+let cameraStream = null; // To hold the camera stream
 
 /**
  * Fetches and parses lyrics from a given path.
@@ -15,7 +16,7 @@ let lyricsLines = [];
  */
 async function fetchLyrics(path) {
   try {
-    const response = await fetch(path);
+    const response = await fetch(`/static/${path}`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const rawLyrics = await response.text();
     return rawLyrics
@@ -69,6 +70,35 @@ function startLyricHighlighting(lyricsDisplay) {
 }
 
 /**
+ * Starts the camera and displays the feed in the background.
+ * @param {HTMLVideoElement} videoElement - The video element to display the stream.
+ * @returns {Promise<boolean>} A promise that resolves to true if the camera started, false otherwise.
+ */
+async function startCamera(videoElement) {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoElement.srcObject = cameraStream;
+      return true; // Indicate success
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      return false; // Indicate failure
+    }
+  }
+  return false;
+}
+
+/**
+ * Stops the camera stream.
+ */
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach((track) => track.stop());
+    cameraStream = null;
+  }
+}
+
+/**
  * Plays the first song from the server's queue.
  */
 export async function playFirstSongInQueue(
@@ -82,14 +112,22 @@ export async function playFirstSongInQueue(
   stopPlayback(karaokeScreen, mainContent);
 
   try {
-    // Fetch the next song from the server. The server will manage the queue.
+    // --- Start Camera Feed First ---
+    const cameraVideo = document.getElementById("camera-feedback");
+    const cameraStarted = await startCamera(cameraVideo);
+
+    if (!cameraStarted) {
+      showToast("Camera not available. Continuing without video.", true);
+    }
+
+    // --- Now, fetch the song from the server ---
     const response = await fetch(`${API_BASE_URL}/api/queue/play`, {
       method: "POST",
     });
 
     if (response.status === 404) {
       showToast("Queue is empty! Add some songs first.");
-      stopPlayback(karaokeScreen, mainContent); // Ensure we return to the main screen
+      stopPlayback(karaokeScreen, mainContent);
       return;
     }
     if (!response.ok) {
@@ -120,7 +158,8 @@ export async function playFirstSongInQueue(
     }
 
     // --- Play Audio ---
-    currentAudio = new Audio(songToPlay.audio_path);
+    const audioPath = `/static/${songToPlay.audio_path}`;
+    currentAudio = new Audio(audioPath);
     currentAudio.play().catch((e) => {
       console.error("Audio play failed:", e);
       showToast("Could not play audio.", true);
@@ -129,7 +168,6 @@ export async function playFirstSongInQueue(
     // --- Setup Event Listeners for the Audio ---
     currentAudio.addEventListener("ended", () => {
       showToast(`Finished: "${songToPlay.song_name}"`);
-      // When the song ends, automatically try to play the next one.
       playFirstSongInQueue(
         showToast,
         nowPlayingTitle,
@@ -141,7 +179,6 @@ export async function playFirstSongInQueue(
 
     currentAudio.addEventListener("error", () => {
       showToast(`Error playing "${songToPlay.song_name}". Skipping.`, true);
-      // If there's an error, skip and try to play the next song.
       playFirstSongInQueue(
         showToast,
         nowPlayingTitle,
@@ -161,6 +198,9 @@ export async function playFirstSongInQueue(
  * Stops the currently playing song and hides the karaoke screen.
  */
 export function stopPlayback(karaokeScreen, mainContent) {
+  // Stop the camera feed
+  stopCamera();
+
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.src = "";

@@ -143,11 +143,14 @@
 
     <!-- Karaoke Playing Screen -->
     <div id="karaoke-screen">
-      <h2 id="now-playing-title" class="section-title"></h2>
-      <div id="lyrics-display"></div>
-      <button id="stop-playing-btn" class="karaoke-screen-button">
-        Stop Playing
-      </button>
+      <video id="camera-feedback" autoplay playsinline></video>
+      <div class="karaoke-overlay">
+        <h2 id="now-playing-title" class="section-title"></h2>
+        <div id="lyrics-display"></div>
+        <button id="stop-playing-btn" class="karaoke-screen-button">
+          Stop Playing
+        </button>
+      </div>
     </div>
 
     <!-- QR Code Container -->

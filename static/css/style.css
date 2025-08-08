@@ -459,25 +459,46 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
-  box-sizing: border-box;
   z-index: 100;
   opacity: 0;
   visibility: hidden;
-  /* Fade out, then hide visibility */
   transition: opacity 0.5s ease-in-out, visibility 0s linear 0.5s;
 }
 
 #karaoke-screen.show {
   opacity: 1;
   visibility: visible;
-  /* Fade in */
   transition: opacity 0.5s ease-in-out;
+}
+
+#camera-feedback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover the whole screen */
+  z-index: 1; /* Behind the overlay */
+  transform: scaleX(-1); /* Mirror effect */
+}
+
+.karaoke-overlay {
+  position: relative;
+  z-index: 2; /* In front of the camera */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  background-color: rgba(0, 0, 0, 0.4); /* Dark overlay for readability */
 }
 
 #now-playing-title {
   transition: opacity 1.5s ease-in-out;
-  min-height: 4rem; /* Prevents lyrics from jumping up */
+  min-height: 4rem;
 }
 
 #now-playing-title.fade-out {

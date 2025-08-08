@@ -1,16 +1,27 @@
 import { playFirstSongInQueue, stopPlayback } from "./playback.js";
 
 // --- CONFIGURATION ---
-// The address of your Flask backend server.
-// This MUST be your computer's local network IP address for other devices to connect.
 const API_BASE_URL = "";
 
 // --- DATA ---
 let fakeSongs = [];
 let currentQueue = [];
+// We need to define artistImages here so showArtistDetail can access it.
+const artistImages = {
+  Dreamweavers: "assets/images/dreamweavers.jpg",
+  "Synthwave Collective": "assets/images/synthwave_collective.jpg",
+  "Cosmic Echoes": "assets/images/cosmic_echoes.jpg",
+  "Urban Beats": "assets/images/urban_beats.jpg",
+  "Forest Folk": "assets/images/forest_folk.jpg",
+  "Chrome Crusaders": "assets/images/chrome_crusaders.jpg",
+  "Aqua Tones": "assets/images/aqua_tones.jpg",
+  "Astro Funk": "assets/images/astro_funk.jpg",
+  "Sandstone Singers": "assets/images/sandstone_singers.jpg",
+  "Digital Pulse": "assets/images/digital_pulse.jpg",
+  "Michael Jackson": "assets/images/michael_jackson.jpg",
+};
 
 // --- DOM ELEMENT REFERENCES ---
-// (This section remains the same)
 const mainContent = document.getElementById("main-content");
 const startPlaylistButton = document.getElementById("start-playlist-btn");
 const queueButton = document.getElementById("queue-btn");
@@ -48,7 +59,6 @@ const lyricsDisplay = document.getElementById("lyrics-display");
 const stopPlayingButton = document.getElementById("stop-playing-btn");
 
 // --- API FUNCTIONS ---
-// (These functions remain the same, but will now use the relative API_BASE_URL)
 async function fetchAvailableSongs() {
   try {
     const response = await fetch(`${API_BASE_URL}/api/songs`);
@@ -115,7 +125,6 @@ async function removeSongFromQueue(index) {
 }
 
 // --- UTILITY & UI FUNCTIONS ---
-// (All these functions remain exactly the same)
 function showToast(message, isError = false) {
   const toast = document.createElement("div");
   toast.classList.add("toast-notification");
@@ -210,9 +219,24 @@ function showArtistDetail(artistName) {
   artistListContainer.style.display = "none";
   artistDetailContainer.style.display = "flex";
   backToArtistsButton.classList.remove("hidden");
-  artistImageWrapper.innerHTML = `<img src="https://placehold.co/200x200/374151/d1d5db?text=${artistName.charAt(
-    0
-  )}" alt="${artistName}" onerror="this.src='https://placehold.co/200x200/374151/d1d5db?text=N/A'">`;
+
+  // Populate image
+  artistImageWrapper.innerHTML = "";
+  const img = document.createElement("img");
+
+  // *** FIX: Prepend the path with '/static/' to create the correct URL ***
+  const imagePath = artistImages[artistName]
+    ? `/static/${artistImages[artistName]}`
+    : `https://placehold.co/200x200/374151/d1d5db?text=${artistName.charAt(0)}`;
+
+  img.src = imagePath;
+  img.alt = artistName;
+  img.onerror = function () {
+    this.src = "https://placehold.co/200x200/374151/d1d5db?text=Not+Found";
+  };
+  artistImageWrapper.appendChild(img);
+
+  // Populate songs
   artistSongsList.innerHTML = "";
   const songsByArtist = fakeSongs.filter((song) => song.artist === artistName);
   songsByArtist.forEach((song) => {
@@ -241,7 +265,6 @@ async function handleAiSearch() {
 }
 
 // --- EVENT LISTENERS ---
-// (This section remains the same)
 startPlaylistButton.addEventListener("click", () => {
   playFirstSongInQueue(
     showToast,
@@ -290,8 +313,8 @@ window.addEventListener("load", async () => {
     const qrContainer = document.getElementById("qr-code-container");
     if (qrContainer) {
       const qr = qrcode(4, "L");
-      // The QR code should now point to the Flask server's address on the hotspot network.
-      const serverUrl = `http://172.20.10.3:5001`;
+      // This should point to your computer's IP on the current network
+      const serverUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
       qr.addData(serverUrl);
       qr.make();
       qrContainer.innerHTML = qr.createImgTag(4, 8);
