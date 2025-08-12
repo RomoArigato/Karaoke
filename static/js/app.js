@@ -57,6 +57,16 @@ const nowPlayingTitle = document.getElementById("now-playing-title");
 const lyricsDisplay = document.getElementById("lyrics-display");
 const stopPlayingButton = document.getElementById("stop-playing-btn");
 
+// --- NEW: Role Management ---
+/**
+ * Checks the URL for a query parameter to determine the client's role.
+ * @returns {boolean} True if the client is the host, false otherwise.
+ */
+function isHostClient() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get("role") === "host";
+}
+
 // --- API FUNCTIONS ---
 async function fetchAvailableSongs() {
   try {
@@ -79,7 +89,7 @@ async function fetchQueue() {
       populateQueueSongList();
     }
   } catch (error) {
-    console.error("Error fetching queue:", error);
+    // It's okay for this to fail silently, as it runs every few seconds.
   }
 }
 
@@ -304,6 +314,11 @@ stopPlayingButton.addEventListener("click", () => {
 window.addEventListener("load", async () => {
   await fetchAvailableSongs();
 
+  if (!isHostClient()) {
+    // If this is a remote client (from QR code), hide the start button.
+    startPlaylistButton.style.display = "none";
+  }
+
   // Generate QR Code
   try {
     const qrContainer = document.getElementById("qr-code-container");
@@ -312,7 +327,9 @@ window.addEventListener("load", async () => {
 
       // *** IMPORTANT: Replace this placeholder with your actual localtunnel URL. ***
       // It should look like: https://your-subdomain.loca.lt
-      const tunnelUrl = "https://<YOUR_LOCALTUNNEL_URL_HERE>";
+      // set up a tunnel with lt --port <port number>
+      // check the password with
+      const tunnelUrl = "https://evil-kiwis-mix.loca.lt";
 
       qr.addData(tunnelUrl);
       qr.make();
