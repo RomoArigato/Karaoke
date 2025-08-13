@@ -9,16 +9,13 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <!-- QR Code Generator Library -->
     <script
-      type="text/javascript"
-      src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js"
     ></script>
   </head>
   <body>
-    <!-- Main Content Container -->
     <div id="main-content">
-      <!-- Avatar Section -->
       <div class="avatar-container">
         <div class="avatar-box">
           <img
@@ -30,7 +27,6 @@
         <p class="avatar-text">Ready to Sing!</p>
       </div>
 
-      <!-- Buttons Section -->
       <div id="button-section">
         <h1 class="section-title">AI Karaoke</h1>
         <button id="start-playlist-btn" class="karaoke-button">
@@ -39,13 +35,11 @@
         <button id="manual-search-btn" class="karaoke-button">
           Manual Search
         </button>
-        <!-- AI Search Button -->
         <button id="ai-search-btn" class="karaoke-button">AI Search</button>
         <button id="queue-btn" class="karaoke-button">Queue</button>
       </div>
     </div>
 
-    <!-- Song Queue Modal -->
     <div id="song-queue-section" class="modal-overlay">
       <div class="modal-content-box">
         <h2 class="section-title">Current Queue</h2>
@@ -55,9 +49,7 @@
             <span class="queue-duration-col">Duration</span>
             <span class="queue-remove-col-placeholder"></span>
           </div>
-          <ul id="queue-song-list" class="modal-list-ul">
-            <!-- Songs will be dynamically inserted here -->
-          </ul>
+          <ul id="queue-song-list" class="modal-list-ul"></ul>
         </div>
         <button
           id="back-to-home-from-queue-btn"
@@ -68,14 +60,11 @@
       </div>
     </div>
 
-    <!-- Manual Search Modal -->
     <div id="manual-search-section" class="modal-overlay">
       <div class="modal-content-box">
         <h2 id="manual-search-title" class="section-title">Artists</h2>
         <div id="artist-list-container" class="modal-list-wrapper">
-          <ul id="artist-list" class="modal-list-ul">
-            <!-- Artists will be dynamically inserted here -->
-          </ul>
+          <ul id="artist-list" class="modal-list-ul"></ul>
         </div>
         <div id="artist-detail-container" class="artist-detail-container">
           <div id="artist-image-wrapper" class="artist-image-wrapper"></div>
@@ -101,7 +90,6 @@
       </div>
     </div>
 
-    <!-- AI Search Modal -->
     <div id="ai-search-section" class="modal-overlay">
       <div class="modal-content-box">
         <h2 class="section-title">AI Song Search</h2>
@@ -122,14 +110,11 @@
         </div>
 
         <div id="ai-search-results-wrapper" class="modal-list-wrapper">
-          <!-- Loading spinner will appear here -->
           <div id="ai-loading-spinner" class="loading-spinner-container hidden">
             <div class="loading-spinner"></div>
             <p>Finding your perfect song...</p>
           </div>
-          <ul id="ai-search-results-list" class="modal-list-ul">
-            <!-- AI generated song results will be inserted here -->
-          </ul>
+          <ul id="ai-search-results-list" class="modal-list-ul"></ul>
         </div>
 
         <button
@@ -141,22 +126,23 @@
       </div>
     </div>
 
-    <!-- Karaoke Playing Screen -->
     <div id="karaoke-screen">
-      <video id="camera-feedback" autoplay playsinline></video>
-      <div class="karaoke-overlay">
-        <h2 id="now-playing-title" class="section-title"></h2>
-        <div id="lyrics-display"></div>
-        <button id="stop-playing-btn" class="karaoke-screen-button">
-          Stop Playing
-        </button>
-      </div>
+      <video
+        id="webcam"
+        class="karaoke-background"
+        autoplay
+        playsinline
+      ></video>
+      <canvas id="output_canvas" class="karaoke-background"></canvas>
+      <h2 id="now-playing-title" class="section-title"></h2>
+      <div id="lyrics-display"></div>
+      <button id="stop-playing-btn" class="karaoke-screen-button">
+        Stop Playing
+      </button>
     </div>
-
-    <!-- QR Code Container -->
-    <div id="qr-code-container"></div>
 
     <script type="module" src="/static/js/app.js"></script>
     <script type="module" src="/static/js/playback.js"></script>
+    <script type="module" src="/static/js/handtracking.js"></script>
   </body>
 </html>

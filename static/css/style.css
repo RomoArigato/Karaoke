@@ -453,52 +453,47 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #000;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.5s ease-in-out, visibility 0s linear 0.5s;
-}
-
-#karaoke-screen.show {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.5s ease-in-out;
-}
-
-#camera-feedback {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Cover the whole screen */
-  z-index: 1; /* Behind the overlay */
-  transform: scaleX(-1); /* Mirror effect */
-}
-
-.karaoke-overlay {
-  position: relative;
-  z-index: 2; /* In front of the camera */
-  width: 100%;
-  height: 100%;
-  display: flex;
+  background-color: #000; /* Black background for karaoke */
+  color: #fff; /* White text */
+  display: none; /* Hidden by default */
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 2rem;
   box-sizing: border-box;
-  background-color: rgba(0, 0, 0, 0.4); /* Dark overlay for readability */
+  z-index: 100; /* Above everything else */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
 }
 
+#karaoke-screen.show {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* New styles for webcam background */
+.karaoke-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* Flip horizontally for a mirror effect */
+  z-index: -1; /* Place it behind other content */
+}
+
+#output_canvas {
+  z-index: 0; /* Place canvas on top of video but behind content */
+}
+
+/* New styles for the now-playing title fade out */
 #now-playing-title {
   transition: opacity 1.5s ease-in-out;
-  min-height: 4rem;
+  min-height: 4rem; /* Prevents lyrics from jumping up */
+  z-index: 1; /* Ensure title is on top of background */
 }
 
 #now-playing-title.fade-out {
@@ -517,6 +512,7 @@ body {
   max-width: 900px;
   font-weight: 700;
   color: #a0aec0;
+  z-index: 1; /* Ensure lyrics are on top of background */
 }
 
 /* The container for the animated lyric line */
@@ -571,6 +567,7 @@ body {
   letter-spacing: 0.05em; /* tracking-wider */
   margin-top: 1rem; /* Space from lyrics */
   cursor: pointer;
+  z-index: 1; /* Ensure button is on top of background */
 }
 
 .karaoke-screen-button:hover {
@@ -647,25 +644,6 @@ body {
   100% {
     transform: rotate(360deg);
   }
-}
-
-/* QR Code Container Styles */
-#qr-code-container {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  background-color: white;
-  padding: 0.5rem;
-  border-radius: 0.5rem; /* rounded-lg */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  z-index: 200;
-  transition: opacity 0.3s ease-in-out;
-}
-
-#qr-code-container img {
-  display: block;
-  width: 100px;
-  height: 100px;
 }
 
 .hidden {

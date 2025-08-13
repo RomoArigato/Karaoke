@@ -1,11 +1,102 @@
 import { playFirstSongInQueue, stopPlayback } from "./playback.js";
-
-// --- CONFIGURATION ---
-const API_BASE_URL = "";
+import { startHandTracking, stopHandTracking } from "./handtracking.js";
 
 // --- DATA ---
-let fakeSongs = [];
-let currentQueue = [];
+// This acts as our local "database" of available songs.
+const fakeSongs = [
+  {
+    song_name: "Midnight Serenade",
+    artist: "Dreamweavers",
+    duration: "4:10",
+    audio_path: "assets/songs/midnight_serenade.mp3",
+    lyrics_path: "assets/lyrics/midnight_serenade.txt",
+  },
+  {
+    song_name: "Electric Dreams",
+    artist: "Synthwave Collective",
+    duration: "3:20",
+    audio_path: "assets/songs/electric_dreams.mp3",
+    lyrics_path: "assets/lyrics/electric_dreams.txt",
+  },
+  {
+    song_name: "Starlight Symphony",
+    artist: "Cosmic Echoes",
+    duration: "5:05",
+    audio_path: "assets/songs/starlight_symphony.mp3",
+    lyrics_path: "assets/lyrics/starlight_symphony.txt",
+  },
+  {
+    song_name: "Rhythm of the City",
+    artist: "Urban Beats",
+    duration: "3:55",
+    audio_path: "assets/songs/rhythm_of_the_city.mp3",
+    lyrics_path: "assets/lyrics/rhythm_of_the_city.txt",
+  },
+  {
+    song_name: "Whispering Pines",
+    artist: "Forest Folk",
+    duration: "2:40",
+    audio_path: "assets/songs/whispering_pines.mp3",
+    lyrics_path: "assets/lyrics/whispering_pines.txt",
+  },
+  {
+    song_name: "Neon Nights",
+    artist: "Chrome Crusaders",
+    duration: "4:30",
+    audio_path: "assets/songs/neon_nights.mp3",
+    lyrics_path: "assets/lyrics/neon_nights.txt",
+  },
+  {
+    song_name: "Ocean's Embrace",
+    artist: "Aqua Tones",
+    duration: "3:15",
+    audio_path: "assets/songs/ocean_embrace.mp3",
+    lyrics_path: "assets/lyrics/ocean_embrace.txt",
+  },
+  {
+    song_name: "Galactic Groove",
+    artist: "Astro Funk",
+    duration: "4:50",
+    audio_path: "assets/songs/galactic_groove.mp3",
+    lyrics_path: "assets/lyrics/galactic_groove.txt",
+  },
+  {
+    song_name: "Desert Bloom",
+    artist: "Sandstone Singers",
+    duration: "2:58",
+    audio_path: "assets/songs/desert_bloom.mp3",
+    lyrics_path: "assets/lyrics/desert_bloom.txt",
+  },
+  {
+    song_name: "Cybernetic Heartbeat",
+    artist: "Digital Pulse",
+    duration: "4:00",
+    audio_path: "assets/songs/cybernetic_heartbeat.mp3",
+    lyrics_path: "assets/lyrics/cybernetic_heartbeat.txt",
+  },
+  {
+    song_name: "Moonlit Dance",
+    artist: "Dreamweavers",
+    duration: "3:45",
+    audio_path: "assets/songs/moonlit_dance.mp3",
+    lyrics_path: "assets/lyrics/moonlit_dance.txt",
+  },
+  {
+    song_name: "Digital Dawn",
+    artist: "Digital Pulse",
+    duration: "3:30",
+    audio_path: "assets/songs/digital_dawn.mp3",
+    lyrics_path: "assets/lyrics/digital_dawn.txt",
+  },
+  {
+    song_name: "Man In The Mirror",
+    artist: "Michael Jackson",
+    duration: "5:19",
+    audio_path: "assets/songs/Man_In_The_Mirror.mp3",
+    lyrics_path: "assets/lyrics/man_in_the_mirror.txt",
+  },
+];
+
 const artistImages = {
   Dreamweavers: "assets/images/dreamweavers.jpg",
   "Synthwave Collective": "assets/images/synthwave_collective.jpg",
@@ -20,15 +111,21 @@ const artistImages = {
   "Michael Jackson": "assets/images/michael_jackson.jpg",
 };
 
+const currentQueue = [];
+
 // --- DOM ELEMENT REFERENCES ---
 const mainContent = document.getElementById("main-content");
 const startPlaylistButton = document.getElementById("start-playlist-btn");
+
+// Queue Section
 const queueButton = document.getElementById("queue-btn");
 const songQueueSection = document.getElementById("song-queue-section");
 const queueSongList = document.getElementById("queue-song-list");
 const backToHomeFromQueueButton = document.getElementById(
   "back-to-home-from-queue-btn"
 );
+
+// Manual Search Section
 const manualSearchButton = document.getElementById("manual-search-btn");
 const manualSearchSection = document.getElementById("manual-search-section");
 const manualSearchTitle = document.getElementById("manual-search-title");
@@ -43,6 +140,8 @@ const backToArtistsButton = document.getElementById("back-to-artists-btn");
 const backToHomeFromManualButton = document.getElementById(
   "back-to-home-from-manual-btn"
 );
+
+// AI Search Section
 const aiSearchButton = document.getElementById("ai-search-btn");
 const aiSearchSection = document.getElementById("ai-search-section");
 const aiSearchInput = document.getElementById("ai-search-input");
@@ -52,110 +151,70 @@ const aiLoadingSpinner = document.getElementById("ai-loading-spinner");
 const backToHomeFromAiButton = document.getElementById(
   "back-to-home-from-ai-btn"
 );
+
+// Karaoke Screen
 const karaokeScreen = document.getElementById("karaoke-screen");
 const nowPlayingTitle = document.getElementById("now-playing-title");
 const lyricsDisplay = document.getElementById("lyrics-display");
 const stopPlayingButton = document.getElementById("stop-playing-btn");
 
-// --- NEW: Role Management ---
+// --- UTILITY FUNCTIONS ---
+
 /**
- * Checks the URL for a query parameter to determine the client's role.
- * @returns {boolean} True if the client is the host, false otherwise.
+ * Displays a toast notification.
+ * @param {string} message - The message to display.
+ * @param {boolean} isError - If true, displays a red error toast.
  */
-function isHostClient() {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("role") === "host";
-}
-
-// --- API FUNCTIONS ---
-async function fetchAvailableSongs() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/songs`);
-    if (!response.ok) throw new Error("Failed to fetch songs");
-    fakeSongs = await response.json();
-  } catch (error) {
-    console.error("Error fetching available songs:", error);
-    showToast("Could not load song library from server.", true);
-  }
-}
-
-async function fetchQueue() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/queue`);
-    if (!response.ok) throw new Error("Failed to fetch queue");
-    const serverQueue = await response.json();
-    if (JSON.stringify(serverQueue) !== JSON.stringify(currentQueue)) {
-      currentQueue = serverQueue;
-      populateQueueSongList();
-    }
-  } catch (error) {
-    // It's okay for this to fail silently, as it runs every few seconds.
-  }
-}
-
-async function addSongToQueue(song) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/queue/add`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(song),
-    });
-    const result = await response.json();
-    if (response.ok) {
-      showToast(`Added "${song.song_name}" to queue`);
-      fetchQueue();
-    } else {
-      showToast(result.message || "Could not add song.", true);
-    }
-  } catch (error) {
-    console.error("Error adding song to queue:", error);
-    showToast("Failed to connect to the server.", true);
-  }
-}
-
-async function removeSongFromQueue(index) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/queue/remove`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ index: index }),
-    });
-    const result = await response.json();
-    if (response.ok) {
-      showToast(result.message);
-      fetchQueue();
-    } else {
-      showToast(result.message || "Could not remove song.", true);
-    }
-  } catch (error) {
-    console.error("Error removing song:", error);
-    showToast("Failed to connect to the server.", true);
-  }
-}
-
-// --- UTILITY & UI FUNCTIONS ---
 function showToast(message, isError = false) {
   const toast = document.createElement("div");
   toast.classList.add("toast-notification");
   if (isError) {
-    toast.style.backgroundColor = "rgba(239, 68, 68, 0.9)";
+    toast.style.backgroundColor = "rgba(239, 68, 68, 0.9)"; // Red for errors
   }
   toast.textContent = message;
   document.body.appendChild(toast);
+
+  // Position toast
   let bottomOffset = 24;
   document.querySelectorAll(".toast-notification.show").forEach((t) => {
     bottomOffset += t.offsetHeight + 16;
   });
   toast.style.bottom = `${bottomOffset}px`;
+
+  // Animate in - using requestAnimationFrame to ensure transition happens
   requestAnimationFrame(() => {
     toast.classList.add("show");
   });
+
+  // Animate out and remove
   setTimeout(() => {
     toast.classList.remove("show");
     toast.addEventListener("transitionend", () => toast.remove());
   }, 3000);
 }
 
+/**
+ * Generic function to add a song to the queue and show a toast.
+ * @param {object} song - The song object to add.
+ */
+function addSongToQueue(song) {
+  const isDuplicate = currentQueue.some(
+    (s) => s.song_name === song.song_name && s.artist === song.artist
+  );
+
+  if (!isDuplicate) {
+    currentQueue.push(song);
+    showToast(`Added "${song.song_name}" to queue`);
+  } else {
+    showToast(`"${song.song_name}" is already in the queue!`);
+  }
+}
+
+/**
+ * Creates a list item for a song with an "Add to Queue" button.
+ * @param {object} song - The song object.
+ * @returns {HTMLLIElement} The created list item element.
+ */
 function createSongListItem(song) {
   const listItem = document.createElement("li");
   listItem.classList.add("list-item");
@@ -169,6 +228,7 @@ function createSongListItem(song) {
             Add
         </button>
     `;
+
   const addButton = listItem.querySelector(".add-to-queue-btn");
   addButton.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -176,6 +236,8 @@ function createSongListItem(song) {
   });
   return listItem;
 }
+
+// --- UI POPULATION FUNCTIONS ---
 
 function populateQueueSongList() {
   queueSongList.innerHTML = "";
@@ -200,7 +262,9 @@ function populateQueueSongList() {
       .addEventListener("click", (e) => {
         e.stopPropagation();
         const songIndex = parseInt(e.currentTarget.dataset.index, 10);
-        removeSongFromQueue(songIndex);
+        const removedSong = currentQueue.splice(songIndex, 1);
+        showToast(`Removed "${removedSong[0].song_name}"`);
+        populateQueueSongList();
       });
     queueSongList.appendChild(listItem);
   });
@@ -229,20 +293,19 @@ function showArtistDetail(artistName) {
   artistDetailContainer.style.display = "flex";
   backToArtistsButton.classList.remove("hidden");
 
+  // Populate image
   artistImageWrapper.innerHTML = "";
   const img = document.createElement("img");
-
-  const imagePath = artistImages[artistName]
-    ? `/static/${artistImages[artistName]}`
-    : `https://placehold.co/200x200/374151/d1d5db?text=${artistName.charAt(0)}`;
-
-  img.src = imagePath;
+  img.src =
+    artistImages[artistName] ||
+    `https://placehold.co/200x200/374151/d1d5db?text=${artistName.charAt(0)}`;
   img.alt = artistName;
   img.onerror = function () {
     this.src = "https://placehold.co/200x200/374151/d1d5db?text=Not+Found";
   };
   artistImageWrapper.appendChild(img);
 
+  // Populate songs
   artistSongsList.innerHTML = "";
   const songsByArtist = fakeSongs.filter((song) => song.artist === artistName);
   songsByArtist.forEach((song) => {
@@ -251,12 +314,13 @@ function showArtistDetail(artistName) {
 }
 
 function populateAiSearchResults(songs) {
-  aiSearchResultsList.innerHTML = "";
+  aiSearchResultsList.innerHTML = ""; // Clear previous results
   if (songs.length === 0) {
-    aiSearchResultsList.innerHTML = `<li class="list-item" style="justify-content: center; color: #a0aec0;">Sorry, no matching songs found.</li>`;
+    aiSearchResultsList.innerHTML = `<li class="list-item" style="justify-content: center; color: #a0aec0;">Sorry, no matching songs found. Try another vibe!</li>`;
     return;
   }
   songs.forEach((song) => {
+    // Find the full song object from our "database" to ensure all data is present
     const fullSongData = fakeSongs.find(
       (fs) => fs.song_name === song.song_name && fs.artist === song.artist
     );
@@ -266,85 +330,152 @@ function populateAiSearchResults(songs) {
   });
 }
 
+// --- AI SEARCH LOGIC ---
 async function handleAiSearch() {
-  // This function can remain the same
+  const userPrompt = aiSearchInput.value.trim();
+  if (!userPrompt) {
+    showToast("Please enter a search description!", true);
+    return;
+  }
+
+  aiLoadingSpinner.classList.remove("hidden");
+  aiSearchResultsList.innerHTML = ""; // Clear previous results
+
+  const systemPrompt = `You are a music curator for a karaoke app. Your task is to select songs from a provided list that match the user's textual description of a mood, genre, or theme.
+
+    Rules:
+    1.  Only select songs from the provided "Available Songs" list.
+    2.  Return your answer as a valid JSON array of song objects.
+    3.  The objects in the array MUST have the following properties: "song_name" and "artist".
+    4.  If no songs from the list match the user's request, return an empty JSON array: [].
+    5.  Do not invent songs. Do not add any explanatory text outside of the JSON response.
+
+    Available Songs:
+    ${JSON.stringify(
+      fakeSongs.map((s) => ({ song_name: s.song_name, artist: s.artist }))
+    )}
+    `;
+
+  try {
+    let chatHistory = [];
+    chatHistory.push({
+      role: "user",
+      parts: [{ text: `User Request: "${userPrompt}"` }],
+    });
+    chatHistory.unshift({ role: "model", parts: [{ text: systemPrompt }] });
+
+    const payload = {
+      contents: chatHistory,
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              song_name: { type: "STRING" },
+              artist: { type: "STRING" },
+            },
+            required: ["song_name", "artist"],
+          },
+        },
+      },
+    };
+
+    const apiKey = ""; // This will be handled by the environment
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+
+    if (result.candidates && result.candidates.length > 0) {
+      const jsonText = result.candidates[0].content.parts[0].text;
+      const suggestedSongs = JSON.parse(jsonText);
+      populateAiSearchResults(suggestedSongs);
+    } else {
+      throw new Error("No valid response from AI.");
+    }
+  } catch (error) {
+    console.error("AI Search Error:", error);
+    showToast("Sorry, the AI search failed. Please try again.", true);
+    populateAiSearchResults([]); // Show empty state
+  } finally {
+    aiLoadingSpinner.classList.add("hidden");
+  }
 }
 
 // --- EVENT LISTENERS ---
+
+// Main Buttons
 startPlaylistButton.addEventListener("click", () => {
+  // First, check if there are songs in the queue
+  if (currentQueue.length === 0) {
+    showToast("Queue is empty! Add some songs first.");
+    return;
+  }
+
+  // Start hand tracking and then play the song
+  startHandTracking();
   playFirstSongInQueue(
+    currentQueue,
     showToast,
     nowPlayingTitle,
     lyricsDisplay,
     mainContent,
-    karaokeScreen
+    karaokeScreen,
+    songQueueSection,
+    manualSearchSection,
+    populateQueueSongList
   );
 });
+
 queueButton.addEventListener("click", () => {
   songQueueSection.classList.add("show-modal");
-  fetchQueue();
+  populateQueueSongList();
 });
+
 manualSearchButton.addEventListener("click", () => {
   manualSearchSection.classList.add("show-modal");
   populateArtistList();
 });
+
 aiSearchButton.addEventListener("click", () => {
   aiSearchSection.classList.add("show-modal");
   aiSearchInput.focus();
 });
+
+// Modal Buttons
 backToHomeFromQueueButton.addEventListener("click", () => {
   songQueueSection.classList.remove("show-modal");
 });
+
 backToHomeFromManualButton.addEventListener("click", () => {
   manualSearchSection.classList.remove("show-modal");
 });
+
 backToArtistsButton.addEventListener("click", populateArtistList);
+
 backToHomeFromAiButton.addEventListener("click", () => {
   aiSearchSection.classList.remove("show-modal");
 });
+
 aiSearchSubmitButton.addEventListener("click", handleAiSearch);
 aiSearchInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") handleAiSearch();
+  if (e.key === "Enter") {
+    handleAiSearch();
+  }
 });
+
+// Karaoke Screen Buttons
 stopPlayingButton.addEventListener("click", () => {
   stopPlayback(karaokeScreen, mainContent);
-});
-
-// --- INITIALIZATION ---
-window.addEventListener("load", async () => {
-  await fetchAvailableSongs();
-
-  if (!isHostClient()) {
-    // If this is a remote client (from QR code), hide the start button.
-    startPlaylistButton.style.display = "none";
-  }
-
-  // Generate QR Code
-  try {
-    const qrContainer = document.getElementById("qr-code-container");
-    if (qrContainer) {
-      const qr = qrcode(4, "L");
-
-      // *** IMPORTANT: Replace this placeholder with your actual localtunnel URL. ***
-      // It should look like: https://your-subdomain.loca.lt
-      // set up a tunnel with lt --port <port number>
-      // check the password with
-      const tunnelUrl = "https://evil-kiwis-mix.loca.lt";
-
-      qr.addData(tunnelUrl);
-      qr.make();
-      qrContainer.innerHTML = qr.createImgTag(4, 8);
-      const qrImg = qrContainer.querySelector("img");
-      if (qrImg) {
-        qrImg.style.width = "100px";
-        qrImg.style.height = "100px";
-      }
-    }
-  } catch (error) {
-    console.error("Could not generate QR code:", error);
-    const qrContainer = document.getElementById("qr-code-container");
-    if (qrContainer) qrContainer.style.display = "none";
-  }
-
-  setInterval(fetchQueue, 3000);
 });
