@@ -23,7 +23,14 @@ available_songs = [
     { "song_name": "Cybernetic Heartbeat", "artist": "Digital Pulse", "duration": "4:00", "audio_path": "assets/songs/cybernetic_heartbeat.mp3", "lyrics_path": "assets/lyrics/cybernetic_heartbeat.txt" },
     { "song_name": "Moonlit Dance", "artist": "Dreamweavers", "duration": "3:45", "audio_path": "assets/songs/moonlit_dance.mp3", "lyrics_path": "assets/lyrics/moonlit_dance.txt" },
     { "song_name": "Digital Dawn", "artist": "Digital Pulse", "duration": "3:30", "audio_path": "assets/songs/digital_dawn.mp3", "lyrics_path": "assets/lyrics/digital_dawn.txt" },
-    { "song_name": "Man In The Mirror", "artist": "Michael Jackson", "duration": "5:19", "audio_path": "assets/songs/Man_In_The_Mirror.mp3", "lyrics_path": "assets/lyrics/man_in_the_mirror.txt" },
+    {
+        "song_name": "Man In The Mirror",
+        "artist": "Michael Jackson",
+        "duration": "5:19",
+        "audio_path": "assets/songs/Man_In_The_Mirror.mp3",
+        "lyrics_path": "assets/lyrics/man_in_the_mirror.txt",
+        "beatmap_path": "assets/beatmaps/man_in_the_mirror.json"
+    },
 ]
 
 # --- Frontend Routes ---

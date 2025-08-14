@@ -567,7 +567,7 @@ body {
   letter-spacing: 0.05em; /* tracking-wider */
   margin-top: 1rem; /* Space from lyrics */
   cursor: pointer;
-  z-index: 1; /* Ensure button is on top of background */
+  z-index: 10; /* Ensure button is on top of background */
 }
 
 .karaoke-screen-button:hover {

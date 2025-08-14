@@ -1,4 +1,5 @@
 import { startHandTracking, stopHandTracking } from "./handtracking.js";
+import { OsuGameplay } from "./gameplay.js";
 
 // Define KaraokeApp on the window object *before* the IIFE
 window.KaraokeApp = window.KaraokeApp || {};
@@ -209,6 +210,19 @@ window.KaraokeApp = window.KaraokeApp || {};
       console.warn("Failed to start hand tracking:", e);
     }
 
+    currentAudio = new Audio(songToPlay.audio_path);
+    const osuGameContainer = document.getElementById("osu-game-container");
+    const osuGame = new OsuGameplay(osuGameContainer, currentAudio);
+
+    if (songToPlay.beatmap_path) {
+      fetch(songToPlay.beatmap_path)
+        .then((response) => response.json())
+        .then((beatmap) => {
+          osuGame.loadBeatmap(beatmap);
+          osuGame.start();
+        });
+    }
+
     lyricsLines = await fetchLyrics(songToPlay.lyrics_path);
     currentLyricLineIndex = 0;
 
@@ -218,7 +232,6 @@ window.KaraokeApp = window.KaraokeApp || {};
       lyricsDisplay.innerHTML = "<p>Lyrics not available for this song.</p>";
     }
 
-    currentAudio = new Audio(songToPlay.audio_path);
     currentAudio.play().catch((e) => {
       console.error("Audio play failed:", e);
       showToast(
@@ -228,6 +241,7 @@ window.KaraokeApp = window.KaraokeApp || {};
     });
 
     currentAudio.addEventListener("ended", () => {
+      osuGame.stop();
       showToast(`Finished: "${songToPlay.song_name}"`);
       currentQueue.shift();
       populateQueueSongList(currentQueue);
@@ -246,11 +260,12 @@ window.KaraokeApp = window.KaraokeApp || {};
         );
       } else {
         showToast("Playlist finished!");
-        KaraokeApp.stopPlayback(karaokeScreen, mainContent);
+        KaraokeApp.stopPlayback();
       }
     });
 
     currentAudio.addEventListener("error", () => {
+      osuGame.stop();
       showToast(`Error playing "${songToPlay.song_name}". Skipping.`, true);
       currentQueue.shift();
       populateQueueSongList(currentQueue);
@@ -267,7 +282,7 @@ window.KaraokeApp = window.KaraokeApp || {};
           populateQueueSongList
         );
       } else {
-        KaraokeApp.stopPlayback(karaokeScreen, mainContent);
+        KaraokeApp.stopPlayback();
       }
     });
   };
@@ -275,7 +290,10 @@ window.KaraokeApp = window.KaraokeApp || {};
   /**
    * Stops the currently playing song and hides the karaoke screen.
    */
-  KaraokeApp.stopPlayback = function (karaokeScreen, mainContent) {
+  KaraokeApp.stopPlayback = function () {
+    const karaokeScreen = document.getElementById("karaoke-screen");
+    const mainContent = document.getElementById("main-content");
+
     // Stop hand tracking and webcam first
     stopHandTracking();
 
@@ -284,10 +302,12 @@ window.KaraokeApp = window.KaraokeApp || {};
       currentAudio.src = "";
       currentAudio = null;
     }
+
     if (lyricHighlightTimeout) {
       clearTimeout(lyricHighlightTimeout);
       lyricHighlightTimeout = null;
     }
+
     currentLyricLineIndex = 0;
     lyricsLines = [];
 
@@ -297,7 +317,7 @@ window.KaraokeApp = window.KaraokeApp || {};
       nowPlayingTitle.classList.remove("fade-out");
     }
 
-    karaokeScreen.classList.remove("show");
-    mainContent.style.display = "flex";
+    if (karaokeScreen) karaokeScreen.classList.remove("show");
+    if (mainContent) mainContent.style.display = "flex";
   };
 })(window.KaraokeApp);

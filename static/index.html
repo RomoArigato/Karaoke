@@ -10,12 +10,25 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Mediapipe Library -->
     <script
       type="module"
       src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js"
     ></script>
+
+    <!-- QR Code Generator Library -->
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.js"
+    ></script>
+
+    <!-- Pixi.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.3/pixi.min.js"></script>
   </head>
+
   <body>
+    <!-- Main Content Container -->
     <div id="main-content">
       <div class="avatar-container">
         <div class="avatar-box">
@@ -28,6 +41,7 @@
         <p class="avatar-text">Ready to Sing!</p>
       </div>
 
+      <!-- Buttons Section -->
       <div id="button-section">
         <h1 class="section-title">AI Karaoke</h1>
         <button id="start-playlist-btn" class="karaoke-button">
@@ -41,6 +55,7 @@
       </div>
     </div>
 
+    <!-- Song Queue Modal -->
     <div id="song-queue-section" class="modal-overlay">
       <div class="modal-content-box">
         <h2 class="section-title">Current Queue</h2>
@@ -61,6 +76,7 @@
       </div>
     </div>
 
+    <!-- Manual Search Modal -->
     <div id="manual-search-section" class="modal-overlay">
       <div class="modal-content-box">
         <h2 id="manual-search-title" class="section-title">Artists</h2>
@@ -91,6 +107,7 @@
       </div>
     </div>
 
+    <!-- AI Search Modal -->
     <div id="ai-search-section" class="modal-overlay">
       <div class="modal-content-box">
         <h2 class="section-title">AI Song Search</h2>
@@ -127,6 +144,7 @@
       </div>
     </div>
 
+    <!-- Karaoke Playing Screen -->
     <div id="karaoke-screen">
       <video
         id="webcam"
@@ -135,6 +153,17 @@
         playsinline
       ></video>
       <canvas id="output_canvas" class="karaoke-background"></canvas>
+      <div
+        id="osu-game-container"
+        style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 2;
+        "
+      ></div>
       <h2 id="now-playing-title" class="section-title"></h2>
       <div id="lyrics-display"></div>
       <button id="stop-playing-btn" class="karaoke-screen-button">
@@ -142,8 +171,12 @@
       </button>
     </div>
 
+    <!-- QR Code Container -->
+    <div id="qr-code-container"></div>
+
     <script type="module" src="/static/js/app.js"></script>
     <script type="module" src="/static/js/playback.js"></script>
     <script type="module" src="/static/js/handtracking.js"></script>
+    <script type="module" src="/static/js/gameplay.js"></script>
   </body>
 </html>

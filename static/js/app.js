@@ -313,7 +313,7 @@ window.addEventListener("load", () => {
   });
   stopPlayingButton.addEventListener("click", () => {
     // Access functions from the global KaraokeApp object
-    KaraokeApp.stopPlayback(karaokeScreen, mainContent);
+    KaraokeApp.stopPlayback();
   });
 
   // --- INITIALIZATION ---
@@ -328,7 +328,7 @@ window.addEventListener("load", () => {
       const qrContainer = document.getElementById("qr-code-container");
       if (qrContainer) {
         const qr = qrcode(4, "L");
-        const tunnelUrl = "https://your-tunnel-url.loca.lt"; // Replace with your tunnel URL
+        const tunnelUrl = "https://bdd1101f02d5.ngrok-free.app"; // Replace with your tunnel URL
         qr.addData(tunnelUrl);
         qr.make();
         qrContainer.innerHTML = qr.createImgTag(4, 8);
