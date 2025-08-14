@@ -89,6 +89,14 @@ async function predictWebcam() {
     lastVideoTime = video.currentTime;
     const results = handLandmarker.detectForVideo(video, startTimeMs);
 
+    if (results.landmarks && results.landmarks.length > 0) {
+      document.dispatchEvent(
+        new CustomEvent("handmove", {
+          detail: { landmarks: results.landmarks },
+        })
+      );
+    }
+
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     if (results.landmarks) {

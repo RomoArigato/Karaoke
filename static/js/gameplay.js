@@ -14,12 +14,16 @@ export class OsuGameplay {
       width: container.clientWidth,
       height: container.clientHeight,
       transparent: true,
+      antialias: true,
     });
     this.container.appendChild(this.app.view);
 
     this.hitObjects = [];
     this.beatmap = null;
     this.score = 0;
+
+    this.handleHandMove = this.handleHandMove.bind(this);
+    document.addEventListener("handmove", this.handleHandMove);
 
     this.app.ticker.add(() => this.update());
   }
@@ -37,6 +41,7 @@ export class OsuGameplay {
     // Clear all hit objects from the screen
     this.hitObjects.forEach((obj) => obj.destroy());
     this.hitObjects = [];
+    document.removeEventListener("handmove", this.handleHandMove);
   }
 
   update() {
@@ -53,6 +58,60 @@ export class OsuGameplay {
     });
   }
 
+  // Hand hit logic
+  processHit(hitCircle) {
+    if (!hitCircle.visible) return;
+
+    const approachCircle = hitCircle.approachCircle;
+    const scale = approachCircle.scale.x;
+
+    if (scale < 1.2) {
+      this.score += 300;
+    } else if (scale < 1.5) {
+      this.score += 100;
+    } else {
+      this.score += 50;
+    }
+    console.log("Score:", this.score);
+
+    hitCircle.visible = false;
+    hitCircle.interactive = false;
+    this.app.stage.removeChild(approachCircle);
+  }
+
+  // Handles collisions
+  handleHandMove(event) {
+    const landmarks = event.detail.landmarks;
+    if (!landmarks || this.hitObjects.length === 0) return;
+
+    // Get canvas dimensions for coordinate conversion
+    const canvasWidth = this.app.view.width;
+    const canvasHeight = this.app.view.height;
+
+    for (const hand of landmarks) {
+      for (const landmark of hand) {
+        // Convert normalized landmark coordinates to pixel coordinates
+        // Webcam feed is flipped, so we flip the x-coordinates back
+        const landmarkX = (1 - landmark.x) * canvasWidth;
+        const landmarkY = landmark.y * canvasHeight;
+
+        // Check this landmark against all visible hit circles
+        for (const hitCircle of this.hitObjects) {
+          if (hitCircle.visible && hitCircle.isHitCircle) {
+            const dx = landmarkX - hitCircle.x;
+            const dy = landmarkY - hitCircle.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance <= HIT_CIRCLE_RADIUS) {
+              this.processHit(hitCircle);
+              break; // Once a landmark hits a circle, we don't need to check other landmarks against it
+            }
+          }
+        }
+      }
+    }
+  }
+
   createHitCircle(x, y) {
     const hitCircle = new PIXI.Graphics();
     hitCircle.lineStyle(4, 0xffffff, 1);
@@ -63,6 +122,7 @@ export class OsuGameplay {
     hitCircle.y = y;
     hitCircle.interactive = true;
     hitCircle.buttonMode = true;
+    hitCircle.isHitCircle = true;
 
     const approachCircle = new PIXI.Graphics();
     approachCircle.lineStyle(4, 0xffffff, 1);
@@ -73,9 +133,10 @@ export class OsuGameplay {
     );
     approachCircle.x = x;
     approachCircle.y = y;
+    hitCircle.approachCircle = approachCircle;
 
     this.app.stage.addChild(hitCircle, approachCircle);
-    this.hitObjects.push(hitCircle, approachCircle);
+    this.hitObjects.push(hitCircle);
 
     const animation = (delta) => {
       const newScale =
@@ -91,26 +152,15 @@ export class OsuGameplay {
 
     this.app.ticker.add(animation);
 
-    hitCircle.on("pointerdown", () => {
-      // Simple scoring mechanism
-      const scale = approachCircle.scale.x;
-      if (scale < 1.2) {
-        this.score += 300;
-      } else if (scale < 1.5) {
-        this.score += 100;
-      } else {
-        this.score += 50;
-      }
-      console.log("Score:", this.score);
-      this.app.stage.removeChild(hitCircle, approachCircle);
-      this.app.ticker.remove(animation);
-    });
+    hitCircle.on("pointerdown", () => this.processHit(hitCircle));
 
     setTimeout(() => {
-      if (this.app.stage.children.includes(hitCircle)) {
+      if (hitCircle.visible) {
         this.app.stage.removeChild(hitCircle, approachCircle);
-        this.app.ticker.remove(animation);
       }
+
+      this.app.ticker.remove(animation);
+      this.hitObjects = this.hitObjects.filter((obj) => obj !== hitCircle);
     }, APPROACH_TIME + 200); // Remove after a short delay if not clicked
   }
 
