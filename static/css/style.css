@@ -565,7 +565,7 @@ body {
   font-weight: 700; /* font-bold */
   text-transform: uppercase; /* uppercase */
   letter-spacing: 0.05em; /* tracking-wider */
-  margin-top: 1rem; /* Space from lyrics */
+  margin-top: 3rem; /* Space from lyrics */
   cursor: pointer;
   z-index: 10; /* Ensure button is on top of background */
 }

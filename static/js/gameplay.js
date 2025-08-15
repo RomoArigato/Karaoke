@@ -1,9 +1,9 @@
-// This will be a basic implementation of Osu!-like gameplay elements using Pixi.js.
+// static/js/osu-gameplay.js
 
-// --- Configuration ---
+// --- CONFIGURATION ---
 const HIT_CIRCLE_RADIUS = 50;
 const SLIDER_BALL_RADIUS = 48;
-const FOLLOW_CIRCLE_RADIUS = 150;
+const FOLLOW_CIRCLE_RADIUS = 150; // The area the user's hand/cursor must stay within
 const APPROACH_CIRCLE_START_SCALE = 3;
 const APPROACH_TIME = 1000; // in milliseconds
 
@@ -20,9 +20,10 @@ export class OsuGameplay {
     });
     this.container.appendChild(this.app.view);
 
-    this.hitObjects = [];
+    this.hitObjects = []; // Stores containers for circles, sliders, etc.
     this.beatmap = null;
     this.score = 0;
+    this.latestLandmarks = []; // Stores the most recent hand data
 
     this.handleHandMove = this.handleHandMove.bind(this);
     document.addEventListener("handmove", this.handleHandMove);
@@ -36,11 +37,9 @@ export class OsuGameplay {
 
   start() {
     this.score = 0;
-    // The update loop will handle the timing of the hit objects
   }
 
   stop() {
-    // Clear all hit objects from the screen
     this.hitObjects.forEach((obj) => obj.destroy());
     this.hitObjects = [];
     document.removeEventListener("handmove", this.handleHandMove);
@@ -48,17 +47,16 @@ export class OsuGameplay {
 
   update(delta) {
     if (!this.beatmap || !this.audio) return;
+    const currentTime = this.audio.currentTime * 1000;
 
-    const currentTime = this.audio.currentTime * 1000; // in milliseconds
-
-    // --- Create new hit objects based on the beatmap ---
+    // Create new hit objects from the beatmap
     this.beatmap.hitObjects.forEach((obj) => {
       if (currentTime >= obj.time - APPROACH_TIME && !obj.isSpawned) {
         obj.isSpawned = true;
         if (obj.type === "slider") {
           this.createSlider(obj);
         } else {
-          this.createHitCircle({ x: obj.x, y: obj.y, time: obj.time });
+          this.createHitCircle(obj);
         }
       }
     });
@@ -71,20 +69,14 @@ export class OsuGameplay {
     });
   }
 
-  // Hand hit logic
   processHit(hitContainer) {
     if (!hitContainer.visible) return;
 
     const approachCircle = hitContainer.approachCircle;
     const scale = approachCircle.scale.x;
-
-    if (scale < 1.2) {
-      this.score += 300;
-    } else if (scale < 1.5) {
-      this.score += 100;
-    } else {
-      this.score += 50;
-    }
+    if (scale < 1.2) this.score += 300;
+    else if (scale < 1.5) this.score += 100;
+    else this.score += 50;
     console.log("Score:", this.score);
 
     if (hitContainer.isSlider) {
@@ -93,7 +85,6 @@ export class OsuGameplay {
       hitContainer.sliderBall.visible = true;
       hitContainer.followCircle.visible = true;
     } else {
-      // For hit circles, it disappears
       hitContainer.visible = false;
     }
 
@@ -101,32 +92,26 @@ export class OsuGameplay {
     this.app.stage.removeChild(approachCircle);
   }
 
-  // Handles collisions
   handleHandMove(event) {
-    const landmarks = event.detail.landmarks;
-    if (!landmarks || this.hitObjects.length === 0) return;
+    this.latestLandmarks = event.detail.landmarks; // Save latest data
+    if (!this.latestLandmarks || this.hitObjects.length === 0) return;
 
-    // Get canvas dimensions for coordinate conversion
     const canvasWidth = this.app.view.width;
     const canvasHeight = this.app.view.height;
 
-    for (const hand of landmarks) {
+    for (const hand of this.latestLandmarks) {
       for (const landmark of hand) {
-        // Convert normalized landmark coordinates to pixel coordinates
-        // Webcam feed is flipped, so we flip the x-coordinates back
         const landmarkX = (1 - landmark.x) * canvasWidth;
         const landmarkY = landmark.y * canvasHeight;
 
-        // Check this landmark against all visible hit circles
         for (const container of this.hitObjects) {
+          // Check only for the initial, interactive hit
           if (container.visible && container.interactive) {
             const dx = landmarkX - container.x;
             const dy = landmarkY - container.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance <= HIT_CIRCLE_RADIUS) {
+            if (Math.sqrt(dx * dx + dy * dy) <= HIT_CIRCLE_RADIUS) {
               this.processHit(container);
-              break; // Once a landmark hits a circle, we don't need to check other landmarks against it
+              break;
             }
           }
         }
@@ -135,26 +120,23 @@ export class OsuGameplay {
   }
 
   createHitCircle(circleData) {
+    const [startPoint] = circleData.points;
     const container = new PIXI.Container();
-    container.x = circleData.x;
-    container.y = circleData.y;
+    container.x = startPoint.x;
+    container.y = startPoint.y;
     container.interactive = true;
     container.buttonMode = true;
 
-    const hitCircle = new PIXI.Graphics();
-    hitCircle.lineStyle(4, 0xffffff, 1);
-    hitCircle.beginFill(0x8b5cf6);
-    hitCircle.drawCircle(0, 0, HIT_CIRCLE_RADIUS);
-    hitCircle.endFill();
+    const hitCircle = new PIXI.Graphics()
+      .lineStyle(4, 0xffffff, 1)
+      .beginFill(0x8b5cf6)
+      .drawCircle(0, 0, HIT_CIRCLE_RADIUS)
+      .endFill();
     container.addChild(hitCircle);
 
-    const approachCircle = new PIXI.Graphics();
-    approachCircle.lineStyle(4, 0xffffff, 1);
-    approachCircle.drawCircle(
-      0,
-      0,
-      HIT_CIRCLE_RADIUS * APPROACH_CIRCLE_START_SCALE
-    );
+    const approachCircle = new PIXI.Graphics()
+      .lineStyle(4, 0xffffff, 1)
+      .drawCircle(0, 0, HIT_CIRCLE_RADIUS * APPROACH_CIRCLE_START_SCALE);
     this.app.stage.addChild(approachCircle);
     approachCircle.x = container.x;
     approachCircle.y = container.y;
@@ -181,62 +163,85 @@ export class OsuGameplay {
     }, circleData.time + APPROACH_TIME - this.audio.currentTime * 1000 + 200);
   }
 
-  // --- Slider and Spinner implementations would go here ---
-  // NEW: Method to create a slider
+  // MODIFIED: Draws a reverse arrow if the slider repeats
   createSlider(sliderData) {
+    const startPoint = sliderData.points[0];
     const container = new PIXI.Container();
-    container.x = sliderData.startX;
-    container.y = sliderData.startY;
+    container.x = startPoint.x;
+    container.y = startPoint.y;
     container.interactive = true;
     container.buttonMode = true;
 
-    // Add properties to the container for state management
     container.isSlider = true;
     container.isFollowing = false;
     container.sliderData = sliderData;
 
-    // Draw the path
-    const path = new PIXI.Graphics();
-    path.lineStyle(10, 0xffffff, 0.5);
-    path.moveTo(0, 0);
-    path.lineTo(
-      sliderData.endX - sliderData.startX,
-      sliderData.endY - sliderData.startY
-    );
+    const path = new PIXI.Graphics().lineStyle(10, 0xffffff, 0.5).moveTo(0, 0);
+
+    let endPoint, beforeEndPoint;
+    if (sliderData.points.length === 2) {
+      // Straight line
+      endPoint = sliderData.points[1];
+      beforeEndPoint = startPoint;
+      path.lineTo(endPoint.x - startPoint.x, endPoint.y - startPoint.y);
+    } else if (sliderData.points.length === 3) {
+      // Curved line
+      const controlPoint = sliderData.points[1];
+      endPoint = sliderData.points[2];
+      beforeEndPoint = controlPoint;
+      path.quadraticCurveTo(
+        controlPoint.x - startPoint.x,
+        controlPoint.y - startPoint.y,
+        endPoint.x - startPoint.x,
+        endPoint.y - startPoint.y
+      );
+    }
     container.addChild(path);
 
-    // Draw the start circle (which is what the user interacts with)
-    const startCircle = new PIXI.Graphics();
-    startCircle.lineStyle(4, 0xffffff, 1);
-    startCircle.beginFill(0x8b5cf6);
-    startCircle.drawCircle(0, 0, HIT_CIRCLE_RADIUS);
-    startCircle.endFill();
+    // NEW: Draw a reverse arrow at the end if repeats > 0
+    if (sliderData.repeats && sliderData.repeats > 0) {
+      const arrow = new PIXI.Graphics();
+      const angle = Math.atan2(
+        beforeEndPoint.y - endPoint.y,
+        beforeEndPoint.x - endPoint.x
+      );
+      arrow
+        .lineStyle(5, 0xec4899, 1)
+        .moveTo(0, 0)
+        .lineTo(20, 10)
+        .moveTo(0, 0)
+        .lineTo(20, -10);
+      arrow.x = endPoint.x - startPoint.x;
+      arrow.y = endPoint.y - startPoint.y;
+      arrow.rotation = angle;
+      container.addChild(arrow);
+    }
+
+    const startCircle = new PIXI.Graphics()
+      .lineStyle(4, 0xffffff, 1)
+      .beginFill(0x8b5cf6)
+      .drawCircle(0, 0, HIT_CIRCLE_RADIUS)
+      .endFill();
     container.addChild(startCircle);
 
-    // Draw the slider ball and follow circle (initially invisible)
-    const sliderBall = new PIXI.Graphics();
-    sliderBall.beginFill(0xec4899);
-    sliderBall.drawCircle(0, 0, SLIDER_BALL_RADIUS);
-    sliderBall.endFill();
+    const sliderBall = new PIXI.Graphics()
+      .beginFill(0xec4899)
+      .drawCircle(0, 0, SLIDER_BALL_RADIUS)
+      .endFill();
     sliderBall.visible = false;
     container.sliderBall = sliderBall;
     container.addChild(sliderBall);
 
-    const followCircle = new PIXI.Graphics();
-    followCircle.lineStyle(4, 0xffffff, 0.5);
-    followCircle.drawCircle(0, 0, FOLLOW_CIRCLE_RADIUS);
+    const followCircle = new PIXI.Graphics()
+      .lineStyle(4, 0xffffff, 0.5)
+      .drawCircle(0, 0, FOLLOW_CIRCLE_RADIUS);
     followCircle.visible = false;
     container.followCircle = followCircle;
     container.addChild(followCircle);
 
-    // Create the approach circle for the start
-    const approachCircle = new PIXI.Graphics();
-    approachCircle.lineStyle(4, 0xffffff, 1);
-    approachCircle.drawCircle(
-      0,
-      0,
-      HIT_CIRCLE_RADIUS * APPROACH_CIRCLE_START_SCALE
-    );
+    const approachCircle = new PIXI.Graphics()
+      .lineStyle(4, 0xffffff, 1)
+      .drawCircle(0, 0, HIT_CIRCLE_RADIUS * APPROACH_CIRCLE_START_SCALE);
     this.app.stage.addChild(approachCircle);
     approachCircle.x = container.x;
     approachCircle.y = container.y;
@@ -258,7 +263,6 @@ export class OsuGameplay {
 
     setTimeout(() => {
       if (!container.isFollowing) {
-        // Missed the initial hit
         this.app.stage.removeChild(container, approachCircle);
         ticker.destroy();
         this.hitObjects = this.hitObjects.filter((obj) => obj !== container);
@@ -266,51 +270,72 @@ export class OsuGameplay {
     }, sliderData.time + APPROACH_TIME - this.audio.currentTime * 1000 + 200);
   }
 
-  // Method to update a slider's position and check for follow
+  // MODIFIED: Implements ping-pong logic for reverse sliders
   updateSlider(container, currentTime) {
-    const { startX, startY, endX, endY, duration } = container.sliderData;
+    const { points, duration, repeats } = container.sliderData;
+    const numTraversals = (repeats || 0) + 1;
+    const totalDuration = duration * numTraversals;
     const elapsedTime = currentTime - container.followStartTime;
-    let t = elapsedTime / duration;
-    if (t > 1) t = 1;
 
-    // Linear interpolation to find the ball's current position
-    const currentX = startX + (endX - startX) * t;
-    const currentY = startY + (endY - startY) * t;
-
-    container.sliderBall.x = currentX - startX;
-    container.sliderBall.y = currentY - startY;
-    container.followCircle.x = currentX - startX;
-    container.followCircle.y = currentY - startY;
-
-    // Check if user is still following
-    const landmark = this.getClosestLandmark(currentX, currentY);
-    if (landmark) {
-      const dx = landmark.x - currentX;
-      const dy = landmark.y - currentY;
-      if (Math.sqrt(dx * dx + dy * dy) > FOLLOW_CIRCLE_RADIUS) {
-        container.isFollowing = false; // Broke combo
-        container.alpha = 0.5; // Indicate failure
-      }
+    // NEW LOGIC: Determine direction and progress for ping-pong effect
+    const traversalIndex = Math.floor(elapsedTime / duration);
+    let t = (elapsedTime % duration) / duration;
+    if (traversalIndex % 2 === 1) {
+      // If on a reverse traversal
+      t = 1 - t;
     }
 
-    // End of slider
-    if (t >= 1) {
+    let currentX, currentY;
+    if (points.length === 2) {
+      // Straight line (Linear Interpolation)
+      const [p0, p1] = points;
+      currentX = p0.x + (p1.x - p0.x) * t;
+      currentY = p0.y + (p1.y - p0.y) * t;
+    } else if (points.length === 3) {
+      // Curved line (Quadratic Bezier)
+      const [p0, p1, p2] = points;
+      const t_inv = 1 - t;
+      currentX = t_inv ** 2 * p0.x + 2 * t_inv * t * p1.x + t ** 2 * p2.x;
+      currentY = t_inv ** 2 * p0.y + 2 * t_inv * t * p1.y + t ** 2 * p2.y;
+    }
+
+    const startPoint = points[0];
+    container.sliderBall.x = currentX - startPoint.x;
+    container.sliderBall.y = currentY - startPoint.y;
+    container.followCircle.x = currentX - startPoint.x;
+    container.followCircle.y = currentY - startPoint.y;
+
+    if (!this.isFollowingCorrectly(currentX, currentY)) {
+      container.isFollowing = false; // Broke combo
+      container.alpha = 0.5; // Indicate failure
+    }
+
+    if (elapsedTime >= totalDuration) {
       container.isFollowing = false;
-      this.score += 300; // Bonus for completing
+      if (container.alpha === 1) this.score += 300; // Bonus for completing
       this.app.stage.removeChild(container);
       this.hitObjects = this.hitObjects.filter((obj) => obj !== container);
     }
   }
 
-  // Helper for slider following logic
-  getClosestLandmark(x, y) {
-    // In a real implementation, you would need to get the latest hand data here.
-    // This is a simplified placeholder. The logic should be integrated
-    // with the main hand tracking loop for better performance.
-    return null; // Placeholder
-  }
+  isFollowingCorrectly(followX, followY) {
+    if (this.latestLandmarks.length === 0) return false;
 
-  createSpinner() {
-    // ...
+    const canvasWidth = this.app.view.width;
+    const canvasHeight = this.app.view.height;
+
+    for (const hand of this.latestLandmarks) {
+      for (const landmark of hand) {
+        const landmarkX = (1 - landmark.x) * canvasWidth;
+        const landmarkY = landmark.y * canvasHeight;
+        const dx = landmarkX - followX;
+        const dy = landmarkY - followY;
+
+        if (Math.sqrt(dx * dx + dy * dy) <= FOLLOW_CIRCLE_RADIUS) {
+          return true; // Found at least one landmark inside, so it's a success
+        }
+      }
+    }
+    return false; // No landmarks were inside the follow circle
   }
 }

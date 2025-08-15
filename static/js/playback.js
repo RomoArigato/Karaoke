@@ -266,7 +266,7 @@ window.KaraokeApp = window.KaraokeApp || {};
 
     currentAudio.addEventListener("error", () => {
       osuGame.stop();
-      showToast(`Error playing "${songToPlay.song_name}". Skipping.`, true);
+      showToast(`Skipped "${songToPlay.song_name}"`, true);
       currentQueue.shift();
       populateQueueSongList(currentQueue);
       if (currentQueue.length > 0) {

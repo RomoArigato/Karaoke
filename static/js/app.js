@@ -267,7 +267,7 @@ window.addEventListener("load", () => {
   }
 
   async function handleAiSearch() {
-    // This function can remain the same
+    // TODO
   }
 
   // --- EVENT LISTENERS ---
@@ -294,8 +294,11 @@ window.addEventListener("load", () => {
     populateArtistList();
   });
   aiSearchButton.addEventListener("click", () => {
-    aiSearchSection.classList.add("show-modal");
-    aiSearchInput.focus();
+    // Placeholder until I actually get this working
+    const clip = new Audio("../assets/songs/temp.mp3");
+    clip.play();
+    // aiSearchSection.classList.add("show-modal");
+    // aiSearchInput.focus();
   });
   backToHomeFromQueueButton.addEventListener("click", () => {
     songQueueSection.classList.remove("show-modal");
@@ -328,7 +331,7 @@ window.addEventListener("load", () => {
       const qrContainer = document.getElementById("qr-code-container");
       if (qrContainer) {
         const qr = qrcode(4, "L");
-        const tunnelUrl = "https://f06392c41c07.ngrok-free.app"; // Replace with your tunnel URL
+        const tunnelUrl = "https://e7c3a94827f6.ngrok-free.app"; // Replace with your tunnel URL
         qr.addData(tunnelUrl);
         qr.make();
         qrContainer.innerHTML = qr.createImgTag(4, 8);
