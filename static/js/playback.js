@@ -204,6 +204,12 @@ window.KaraokeApp = window.KaraokeApp || {};
     songQueueSection.classList.remove("show-modal");
     manualSearchSection.classList.remove("show-modal");
     karaokeScreen.classList.add("show");
+
+    const qrContainer = document.getElementById("qr-code-container");
+    if (qrContainer) {
+      qrContainer.classList.add("hidden");
+    }
+
     try {
       await startHandTracking();
     } catch (e) {
@@ -315,6 +321,11 @@ window.KaraokeApp = window.KaraokeApp || {};
     const nowPlayingTitle = document.getElementById("now-playing-title");
     if (nowPlayingTitle) {
       nowPlayingTitle.classList.remove("fade-out");
+    }
+
+    const qrContainer = document.getElementById("qr-code-container");
+    if (qrContainer) {
+      qrContainer.classList.remove("hidden");
     }
 
     if (karaokeScreen) karaokeScreen.classList.remove("show");
