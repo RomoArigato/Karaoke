@@ -10,6 +10,7 @@ window.KaraokeApp = window.KaraokeApp || {};
   let lyricHighlightTimeout = null;
   let currentLyricLineIndex = 0;
   let lyricsLines = []; // Array of arrays of words
+  let osuGame = null;
 
   /**
    * Fetches and parses lyrics from a given path.
@@ -138,10 +139,15 @@ window.KaraokeApp = window.KaraokeApp || {};
       return;
     }
 
+    if (osuGame) {
+      osuGame.stop();
+      osuGame = null;
+    }
     // This function is now the single source of truth for stopping.
     // We don't want to stop playback here, just ensure a clean state if a song was already playing.
     if (currentAudio) {
       currentAudio.pause();
+      currentAudio.src = "";
       currentAudio = null;
     }
 
@@ -218,7 +224,7 @@ window.KaraokeApp = window.KaraokeApp || {};
 
     currentAudio = new Audio(songToPlay.audio_path);
     const osuGameContainer = document.getElementById("osu-game-container");
-    const osuGame = new OsuGameplay(osuGameContainer, currentAudio);
+    osuGame = new OsuGameplay(osuGameContainer, currentAudio);
 
     if (songToPlay.beatmap_path) {
       fetch(songToPlay.beatmap_path)
@@ -299,6 +305,11 @@ window.KaraokeApp = window.KaraokeApp || {};
   KaraokeApp.stopPlayback = function () {
     const karaokeScreen = document.getElementById("karaoke-screen");
     const mainContent = document.getElementById("main-content");
+
+    if (osuGame) {
+      osuGame.stop();
+      osuGame = null;
+    }
 
     // Stop hand tracking and webcam first
     stopHandTracking();

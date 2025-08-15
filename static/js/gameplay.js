@@ -3,7 +3,8 @@
 // --- CONFIGURATION ---
 const HIT_CIRCLE_RADIUS = 50;
 const SLIDER_BALL_RADIUS = 48;
-const FOLLOW_CIRCLE_RADIUS = 150; // The area the user's hand/cursor must stay within
+const FOLLOW_CIRCLE_RADIUS = 150;
+const SPINNER_RADIUS = 250;
 const APPROACH_CIRCLE_START_SCALE = 3;
 const APPROACH_TIME = 1000; // in milliseconds
 
@@ -32,7 +33,8 @@ export class OsuGameplay {
   }
 
   loadBeatmap(beatmap) {
-    this.beatmap = beatmap;
+    // this.beatmap = beatmap;
+    this.beatmap = JSON.parse(JSON.stringify(beatmap));
   }
 
   start() {
@@ -40,7 +42,10 @@ export class OsuGameplay {
   }
 
   stop() {
-    this.hitObjects.forEach((obj) => obj.destroy());
+    this.hitObjects.forEach((obj) => {
+      if (obj.ticker) obj.ticker.destroy();
+      obj.destroy();
+    });
     this.hitObjects = [];
     document.removeEventListener("handmove", this.handleHandMove);
   }
@@ -55,16 +60,20 @@ export class OsuGameplay {
         obj.isSpawned = true;
         if (obj.type === "slider") {
           this.createSlider(obj);
+        } else if (obj.type === "spinner") {
+          this.createSpinner(obj);
         } else {
           this.createHitCircle(obj);
         }
       }
     });
 
-    // Update active sliders
+    // Update active sliders and spinners
     this.hitObjects.forEach((container) => {
       if (container.isSlider && container.isFollowing) {
         this.updateSlider(container, currentTime);
+      } else if (container.isSpinner && container.isActive) {
+        this.updateSpinner(container);
       }
     });
   }
@@ -105,7 +114,6 @@ export class OsuGameplay {
         const landmarkY = landmark.y * canvasHeight;
 
         for (const container of this.hitObjects) {
-          // Check only for the initial, interactive hit
           if (container.visible && container.interactive) {
             const dx = landmarkX - container.x;
             const dy = landmarkY - container.y;
@@ -144,26 +152,28 @@ export class OsuGameplay {
     container.approachCircle = approachCircle;
     container.on("pointerdown", () => this.processHit(container));
 
-    const ticker = new PIXI.Ticker();
-    ticker.add(() => {
+    container.ticker = new PIXI.Ticker();
+    container.ticker.add(() => {
       const newScale =
         approachCircle.scale.x -
-        (APPROACH_CIRCLE_START_SCALE - 1) * (ticker.deltaMS / APPROACH_TIME);
+        (APPROACH_CIRCLE_START_SCALE - 1) *
+          (container.ticker.deltaMS / APPROACH_TIME);
       if (newScale >= 1) approachCircle.scale.set(newScale);
     });
-    ticker.start();
+    container.ticker.start();
 
     this.app.stage.addChild(container);
     this.hitObjects.push(container);
 
+    // Ensure the ticker is always destroyed
     setTimeout(() => {
       this.app.stage.removeChild(container, approachCircle);
-      ticker.destroy();
       this.hitObjects = this.hitObjects.filter((obj) => obj !== container);
-    }, circleData.time + APPROACH_TIME - this.audio.currentTime * 1000 + 200);
+      if (container.ticker) container.ticker.destroy(); // This is the important change
+      container.destroy();
+    }, circleData.time - this.audio.currentTime * 1000 + APPROACH_TIME + 200);
   }
 
-  // MODIFIED: Draws a reverse arrow if the slider repeats
   createSlider(sliderData) {
     const startPoint = sliderData.points[0];
     const container = new PIXI.Container();
@@ -198,7 +208,6 @@ export class OsuGameplay {
     }
     container.addChild(path);
 
-    // NEW: Draw a reverse arrow at the end if repeats > 0
     if (sliderData.repeats && sliderData.repeats > 0) {
       const arrow = new PIXI.Graphics();
       const angle = Math.atan2(
@@ -249,50 +258,48 @@ export class OsuGameplay {
     container.approachCircle = approachCircle;
     container.on("pointerdown", () => this.processHit(container));
 
-    const ticker = new PIXI.Ticker();
-    ticker.add(() => {
+    container.ticker = new PIXI.Ticker();
+    container.ticker.add(() => {
       const newScale =
         approachCircle.scale.x -
-        (APPROACH_CIRCLE_START_SCALE - 1) * (ticker.deltaMS / APPROACH_TIME);
+        (APPROACH_CIRCLE_START_SCALE - 1) *
+          (container.ticker.deltaMS / APPROACH_TIME);
       if (newScale >= 1) approachCircle.scale.set(newScale);
     });
-    ticker.start();
+    container.ticker.start();
 
     this.app.stage.addChild(container);
     this.hitObjects.push(container);
 
+    // Ensure the ticker is always destroyed
     setTimeout(() => {
       if (!container.isFollowing) {
         this.app.stage.removeChild(container, approachCircle);
-        ticker.destroy();
         this.hitObjects = this.hitObjects.filter((obj) => obj !== container);
+        if (container.ticker) container.ticker.destroy(); // This is the important change
+        container.destroy();
       }
-    }, sliderData.time + APPROACH_TIME - this.audio.currentTime * 1000 + 200);
+    }, sliderData.time - this.audio.currentTime * 1000 + APPROACH_TIME + 200);
   }
 
-  // MODIFIED: Implements ping-pong logic for reverse sliders
   updateSlider(container, currentTime) {
     const { points, duration, repeats } = container.sliderData;
     const numTraversals = (repeats || 0) + 1;
     const totalDuration = duration * numTraversals;
     const elapsedTime = currentTime - container.followStartTime;
 
-    // NEW LOGIC: Determine direction and progress for ping-pong effect
     const traversalIndex = Math.floor(elapsedTime / duration);
     let t = (elapsedTime % duration) / duration;
     if (traversalIndex % 2 === 1) {
-      // If on a reverse traversal
       t = 1 - t;
     }
 
     let currentX, currentY;
     if (points.length === 2) {
-      // Straight line (Linear Interpolation)
       const [p0, p1] = points;
       currentX = p0.x + (p1.x - p0.x) * t;
       currentY = p0.y + (p1.y - p0.y) * t;
     } else if (points.length === 3) {
-      // Curved line (Quadratic Bezier)
       const [p0, p1, p2] = points;
       const t_inv = 1 - t;
       currentX = t_inv ** 2 * p0.x + 2 * t_inv * t * p1.x + t ** 2 * p2.x;
@@ -306,16 +313,116 @@ export class OsuGameplay {
     container.followCircle.y = currentY - startPoint.y;
 
     if (!this.isFollowingCorrectly(currentX, currentY)) {
-      container.isFollowing = false; // Broke combo
-      container.alpha = 0.5; // Indicate failure
+      container.isFollowing = false;
+      container.alpha = 0.5;
     }
 
     if (elapsedTime >= totalDuration) {
       container.isFollowing = false;
-      if (container.alpha === 1) this.score += 300; // Bonus for completing
+      if (container.alpha === 1) this.score += 300;
       this.app.stage.removeChild(container);
       this.hitObjects = this.hitObjects.filter((obj) => obj !== container);
     }
+  }
+
+  // NEW: Method to create a spinner
+  createSpinner(spinnerData) {
+    const container = new PIXI.Container();
+    container.x = this.app.view.width / 2;
+    container.y = this.app.view.height / 2;
+
+    container.isSpinner = true;
+    container.isActive = false;
+    container.totalRotation = 0;
+    container.lastAngle = null;
+
+    const bg = new PIXI.Graphics()
+      .beginFill(0x8b5cf6, 0.2)
+      .drawCircle(0, 0, SPINNER_RADIUS)
+      .endFill();
+    container.addChild(bg);
+
+    const progress = new PIXI.Graphics();
+    container.progress = progress;
+    container.addChild(progress);
+
+    const center = new PIXI.Graphics()
+      .beginFill(0xffffff, 1)
+      .drawCircle(0, 0, 20)
+      .endFill();
+    container.addChild(center);
+
+    this.app.stage.addChild(container);
+    this.hitObjects.push(container);
+
+    setTimeout(() => {
+      container.isActive = true;
+    }, spinnerData.time - this.audio.currentTime * 1000);
+
+    setTimeout(() => {
+      container.isActive = false;
+      this.score += Math.floor(container.totalRotation / (2 * Math.PI)) * 1000; // Bonus per rotation
+      this.app.stage.removeChild(container);
+      this.hitObjects = this.hitObjects.filter((obj) => obj !== container);
+    }, spinnerData.time + spinnerData.duration - this.audio.currentTime * 1000);
+  }
+
+  // NEW: Method to update a spinner's rotation and progress
+  updateSpinner(container) {
+    if (
+      this.latestLandmarks.length === 0 ||
+      this.latestLandmarks[0].length === 0
+    ) {
+      container.lastAngle = null;
+      return;
+    }
+
+    const canvasWidth = this.app.view.width;
+    const canvasHeight = this.app.view.height;
+    const landmark = this.latestLandmarks[0][8]; // Use the index finger tip
+    const landmarkX = (1 - landmark.x) * canvasWidth;
+    const landmarkY = landmark.y * canvasHeight;
+
+    const dx = landmarkX - container.x;
+    const dy = landmarkY - container.y;
+
+    // Only spin if hand is inside the spinner area
+    if (Math.sqrt(dx * dx + dy * dy) > SPINNER_RADIUS) {
+      container.lastAngle = null;
+      return;
+    }
+
+    const currentAngle = Math.atan2(dy, dx);
+
+    if (container.lastAngle !== null) {
+      let deltaAngle = currentAngle - container.lastAngle;
+      // Handle angle wraparound from +PI to -PI and vice-versa
+      if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
+      if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
+
+      container.totalRotation += deltaAngle;
+      this.score += Math.abs(Math.round(deltaAngle * 10)); // Constant stream of points
+    }
+
+    container.lastAngle = currentAngle;
+
+    // Update visual progress meter
+    const rotations = Math.abs(container.totalRotation / (2 * Math.PI));
+    const fullRotations = Math.floor(rotations);
+    const partialRotation = rotations - fullRotations;
+
+    container.progress
+      .clear()
+      .beginFill(0xffffff, 0.5)
+      .moveTo(0, 0)
+      .arc(
+        0,
+        0,
+        SPINNER_RADIUS,
+        -Math.PI / 2,
+        -Math.PI / 2 + partialRotation * 2 * Math.PI
+      )
+      .endFill();
   }
 
   isFollowingCorrectly(followX, followY) {
@@ -332,10 +439,10 @@ export class OsuGameplay {
         const dy = landmarkY - followY;
 
         if (Math.sqrt(dx * dx + dy * dy) <= FOLLOW_CIRCLE_RADIUS) {
-          return true; // Found at least one landmark inside, so it's a success
+          return true;
         }
       }
     }
-    return false; // No landmarks were inside the follow circle
+    return false;
   }
 }

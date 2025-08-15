@@ -3,39 +3,11 @@
   "artist": "Michael Jackson",
   "hitObjects": [
     {
-      "type": "hitcircle",
-      "time": 1000,
-      "points": [{ "x": 640, "y": 360 }]
+      "type": "spinner",
+      "time": 500,
+      "duration": 5000
     },
-    {
-      "type": "slider",
-      "time": 3000,
-      "duration": 1500,
-      "points": [
-        { "x": 200, "y": 200 },
-        { "x": 500, "y": 200 }
-      ]
-    },
-    {
-      "type": "slider",
-      "time": 5500,
-      "duration": 2000,
-      "points": [
-        { "x": 800, "y": 200 },
-        { "x": 900, "y": 500 },
-        { "x": 1000, "y": 200 }
-      ]
-    },
-    {
-      "type": "slider",
-      "time": 8500,
-      "duration": 1500,
-      "repeats": 1,
-      "points": [
-        { "x": 250, "y": 600 },
-        { "x": 250, "y": 300 }
-      ]
-    },
+
     {
       "type": "hitcircle",
       "time": 12500,
