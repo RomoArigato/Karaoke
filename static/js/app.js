@@ -328,7 +328,7 @@ window.addEventListener("load", () => {
       const qrContainer = document.getElementById("qr-code-container");
       if (qrContainer) {
         const qr = qrcode(4, "L");
-        const tunnelUrl = "https://bdd1101f02d5.ngrok-free.app"; // Replace with your tunnel URL
+        const tunnelUrl = "https://f06392c41c07.ngrok-free.app"; // Replace with your tunnel URL
         qr.addData(tunnelUrl);
         qr.make();
         qrContainer.innerHTML = qr.createImgTag(4, 8);

@@ -1,0 +1,228 @@
+{
+  "songName": "Billie Jean",
+  "artist": "Michael Jackson",
+  "hitObjects": [
+    {
+      "type": "hitcircle",
+      "time": 1000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 2000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 4000,
+      "x": 600,
+      "y": 300
+    },
+    {
+      "type": "hitcircle",
+      "time": 5000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 7000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 8500,
+      "x": 600,
+      "y": 300
+    },
+    {
+      "type": "hitcircle",
+      "time": 10000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 11000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 12000,
+      "x": 600,
+      "y": 300
+    },
+    {
+      "type": "hitcircle",
+      "time": 13000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 15000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 15500,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 16000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 17000,
+      "x": 600,
+      "y": 300
+    },
+    {
+      "type": "hitcircle",
+      "time": 18000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 18500,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 19000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 20000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 21000,
+      "x": 600,
+      "y": 300
+    },
+    {
+      "type": "hitcircle",
+      "time": 22000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 2300,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 24000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 25000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 26000,
+      "x": 600,
+      "y": 300
+    },
+    {
+      "type": "hitcircle",
+      "time": 27000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 28000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 29000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 30000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 31000,
+      "x": 600,
+      "y": 300
+    },
+    {
+      "type": "hitcircle",
+      "time": 32000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 32000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 // --- Configuration ---
 const HIT_CIRCLE_RADIUS = 50;
+const SLIDER_BALL_RADIUS = 48;
+const FOLLOW_CIRCLE_RADIUS = 150;
 const APPROACH_CIRCLE_START_SCALE = 3;
 const APPROACH_TIME = 1000; // in milliseconds
 
@@ -25,7 +27,7 @@ export class OsuGameplay {
     this.handleHandMove = this.handleHandMove.bind(this);
     document.addEventListener("handmove", this.handleHandMove);
 
-    this.app.ticker.add(() => this.update());
+    this.app.ticker.add((delta) => this.update(delta));
   }
 
   loadBeatmap(beatmap) {
@@ -44,8 +46,8 @@ export class OsuGameplay {
     document.removeEventListener("handmove", this.handleHandMove);
   }
 
-  update() {
-    if (!this.beatmap) return;
+  update(delta) {
+    if (!this.beatmap || !this.audio) return;
 
     const currentTime = this.audio.currentTime * 1000; // in milliseconds
 
@@ -53,16 +55,27 @@ export class OsuGameplay {
     this.beatmap.hitObjects.forEach((obj) => {
       if (currentTime >= obj.time - APPROACH_TIME && !obj.isSpawned) {
         obj.isSpawned = true;
-        this.createHitCircle(obj.x, obj.y);
+        if (obj.type === "slider") {
+          this.createSlider(obj);
+        } else {
+          this.createHitCircle({ x: obj.x, y: obj.y, time: obj.time });
+        }
+      }
+    });
+
+    // Update active sliders
+    this.hitObjects.forEach((container) => {
+      if (container.isSlider && container.isFollowing) {
+        this.updateSlider(container, currentTime);
       }
     });
   }
 
   // Hand hit logic
-  processHit(hitCircle) {
-    if (!hitCircle.visible) return;
+  processHit(hitContainer) {
+    if (!hitContainer.visible) return;
 
-    const approachCircle = hitCircle.approachCircle;
+    const approachCircle = hitContainer.approachCircle;
     const scale = approachCircle.scale.x;
 
     if (scale < 1.2) {
@@ -74,8 +87,17 @@ export class OsuGameplay {
     }
     console.log("Score:", this.score);
 
-    hitCircle.visible = false;
-    hitCircle.interactive = false;
+    if (hitContainer.isSlider) {
+      hitContainer.isFollowing = true;
+      hitContainer.followStartTime = this.audio.currentTime * 1000;
+      hitContainer.sliderBall.visible = true;
+      hitContainer.followCircle.visible = true;
+    } else {
+      // For hit circles, it disappears
+      hitContainer.visible = false;
+    }
+
+    hitContainer.interactive = false;
     this.app.stage.removeChild(approachCircle);
   }
 
@@ -96,14 +118,14 @@ export class OsuGameplay {
         const landmarkY = landmark.y * canvasHeight;
 
         // Check this landmark against all visible hit circles
-        for (const hitCircle of this.hitObjects) {
-          if (hitCircle.visible && hitCircle.isHitCircle) {
-            const dx = landmarkX - hitCircle.x;
-            const dy = landmarkY - hitCircle.y;
+        for (const container of this.hitObjects) {
+          if (container.visible && container.interactive) {
+            const dx = landmarkX - container.x;
+            const dy = landmarkY - container.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance <= HIT_CIRCLE_RADIUS) {
-              this.processHit(hitCircle);
+              this.processHit(container);
               break; // Once a landmark hits a circle, we don't need to check other landmarks against it
             }
           }
@@ -112,17 +134,19 @@ export class OsuGameplay {
     }
   }
 
-  createHitCircle(x, y) {
+  createHitCircle(circleData) {
+    const container = new PIXI.Container();
+    container.x = circleData.x;
+    container.y = circleData.y;
+    container.interactive = true;
+    container.buttonMode = true;
+
     const hitCircle = new PIXI.Graphics();
     hitCircle.lineStyle(4, 0xffffff, 1);
     hitCircle.beginFill(0x8b5cf6);
     hitCircle.drawCircle(0, 0, HIT_CIRCLE_RADIUS);
     hitCircle.endFill();
-    hitCircle.x = x;
-    hitCircle.y = y;
-    hitCircle.interactive = true;
-    hitCircle.buttonMode = true;
-    hitCircle.isHitCircle = true;
+    container.addChild(hitCircle);
 
     const approachCircle = new PIXI.Graphics();
     approachCircle.lineStyle(4, 0xffffff, 1);
@@ -131,42 +155,159 @@ export class OsuGameplay {
       0,
       HIT_CIRCLE_RADIUS * APPROACH_CIRCLE_START_SCALE
     );
-    approachCircle.x = x;
-    approachCircle.y = y;
-    hitCircle.approachCircle = approachCircle;
+    this.app.stage.addChild(approachCircle);
+    approachCircle.x = container.x;
+    approachCircle.y = container.y;
 
-    this.app.stage.addChild(hitCircle, approachCircle);
-    this.hitObjects.push(hitCircle);
+    container.approachCircle = approachCircle;
+    container.on("pointerdown", () => this.processHit(container));
 
-    const animation = (delta) => {
+    const ticker = new PIXI.Ticker();
+    ticker.add(() => {
       const newScale =
         approachCircle.scale.x -
-        (APPROACH_CIRCLE_START_SCALE - 1) *
-          (delta / (APPROACH_TIME / (1000 / 60)));
-      if (newScale >= 1) {
-        approachCircle.scale.set(newScale);
-      } else {
-        approachCircle.scale.set(1);
-      }
-    };
+        (APPROACH_CIRCLE_START_SCALE - 1) * (ticker.deltaMS / APPROACH_TIME);
+      if (newScale >= 1) approachCircle.scale.set(newScale);
+    });
+    ticker.start();
 
-    this.app.ticker.add(animation);
-
-    hitCircle.on("pointerdown", () => this.processHit(hitCircle));
+    this.app.stage.addChild(container);
+    this.hitObjects.push(container);
 
     setTimeout(() => {
-      if (hitCircle.visible) {
-        this.app.stage.removeChild(hitCircle, approachCircle);
-      }
-
-      this.app.ticker.remove(animation);
-      this.hitObjects = this.hitObjects.filter((obj) => obj !== hitCircle);
-    }, APPROACH_TIME + 200); // Remove after a short delay if not clicked
+      this.app.stage.removeChild(container, approachCircle);
+      ticker.destroy();
+      this.hitObjects = this.hitObjects.filter((obj) => obj !== container);
+    }, circleData.time + APPROACH_TIME - this.audio.currentTime * 1000 + 200);
   }
 
   // --- Slider and Spinner implementations would go here ---
-  createSlider(points) {
-    // ...
+  // NEW: Method to create a slider
+  createSlider(sliderData) {
+    const container = new PIXI.Container();
+    container.x = sliderData.startX;
+    container.y = sliderData.startY;
+    container.interactive = true;
+    container.buttonMode = true;
+
+    // Add properties to the container for state management
+    container.isSlider = true;
+    container.isFollowing = false;
+    container.sliderData = sliderData;
+
+    // Draw the path
+    const path = new PIXI.Graphics();
+    path.lineStyle(10, 0xffffff, 0.5);
+    path.moveTo(0, 0);
+    path.lineTo(
+      sliderData.endX - sliderData.startX,
+      sliderData.endY - sliderData.startY
+    );
+    container.addChild(path);
+
+    // Draw the start circle (which is what the user interacts with)
+    const startCircle = new PIXI.Graphics();
+    startCircle.lineStyle(4, 0xffffff, 1);
+    startCircle.beginFill(0x8b5cf6);
+    startCircle.drawCircle(0, 0, HIT_CIRCLE_RADIUS);
+    startCircle.endFill();
+    container.addChild(startCircle);
+
+    // Draw the slider ball and follow circle (initially invisible)
+    const sliderBall = new PIXI.Graphics();
+    sliderBall.beginFill(0xec4899);
+    sliderBall.drawCircle(0, 0, SLIDER_BALL_RADIUS);
+    sliderBall.endFill();
+    sliderBall.visible = false;
+    container.sliderBall = sliderBall;
+    container.addChild(sliderBall);
+
+    const followCircle = new PIXI.Graphics();
+    followCircle.lineStyle(4, 0xffffff, 0.5);
+    followCircle.drawCircle(0, 0, FOLLOW_CIRCLE_RADIUS);
+    followCircle.visible = false;
+    container.followCircle = followCircle;
+    container.addChild(followCircle);
+
+    // Create the approach circle for the start
+    const approachCircle = new PIXI.Graphics();
+    approachCircle.lineStyle(4, 0xffffff, 1);
+    approachCircle.drawCircle(
+      0,
+      0,
+      HIT_CIRCLE_RADIUS * APPROACH_CIRCLE_START_SCALE
+    );
+    this.app.stage.addChild(approachCircle);
+    approachCircle.x = container.x;
+    approachCircle.y = container.y;
+
+    container.approachCircle = approachCircle;
+    container.on("pointerdown", () => this.processHit(container));
+
+    const ticker = new PIXI.Ticker();
+    ticker.add(() => {
+      const newScale =
+        approachCircle.scale.x -
+        (APPROACH_CIRCLE_START_SCALE - 1) * (ticker.deltaMS / APPROACH_TIME);
+      if (newScale >= 1) approachCircle.scale.set(newScale);
+    });
+    ticker.start();
+
+    this.app.stage.addChild(container);
+    this.hitObjects.push(container);
+
+    setTimeout(() => {
+      if (!container.isFollowing) {
+        // Missed the initial hit
+        this.app.stage.removeChild(container, approachCircle);
+        ticker.destroy();
+        this.hitObjects = this.hitObjects.filter((obj) => obj !== container);
+      }
+    }, sliderData.time + APPROACH_TIME - this.audio.currentTime * 1000 + 200);
+  }
+
+  // Method to update a slider's position and check for follow
+  updateSlider(container, currentTime) {
+    const { startX, startY, endX, endY, duration } = container.sliderData;
+    const elapsedTime = currentTime - container.followStartTime;
+    let t = elapsedTime / duration;
+    if (t > 1) t = 1;
+
+    // Linear interpolation to find the ball's current position
+    const currentX = startX + (endX - startX) * t;
+    const currentY = startY + (endY - startY) * t;
+
+    container.sliderBall.x = currentX - startX;
+    container.sliderBall.y = currentY - startY;
+    container.followCircle.x = currentX - startX;
+    container.followCircle.y = currentY - startY;
+
+    // Check if user is still following
+    const landmark = this.getClosestLandmark(currentX, currentY);
+    if (landmark) {
+      const dx = landmark.x - currentX;
+      const dy = landmark.y - currentY;
+      if (Math.sqrt(dx * dx + dy * dy) > FOLLOW_CIRCLE_RADIUS) {
+        container.isFollowing = false; // Broke combo
+        container.alpha = 0.5; // Indicate failure
+      }
+    }
+
+    // End of slider
+    if (t >= 1) {
+      container.isFollowing = false;
+      this.score += 300; // Bonus for completing
+      this.app.stage.removeChild(container);
+      this.hitObjects = this.hitObjects.filter((obj) => obj !== container);
+    }
+  }
+
+  // Helper for slider following logic
+  getClosestLandmark(x, y) {
+    // In a real implementation, you would need to get the latest hand data here.
+    // This is a simplified placeholder. The logic should be integrated
+    // with the main hand tracking loop for better performance.
+    return null; // Placeholder
   }
 
   createSpinner() {

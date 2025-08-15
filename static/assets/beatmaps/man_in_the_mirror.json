@@ -2,14 +2,26 @@
   "songName": "Man In The Mirror",
   "artist": "Michael Jackson",
   "hitObjects": [
-    { "time": 1000, "x": 200, "y": 300 },
-    { "time": 2000, "x": 400, "y": 400 },
-    { "time": 3000, "x": 600, "y": 700 },
-    { "time": 4000, "x": 100, "y": 200 },
-    { "time": 5000, "x": 200, "y": 300 },
-    { "time": 6000, "x": 300, "y": 100 },
-    { "time": 7000, "x": 400, "y": 500 },
-    { "time": 8000, "x": 500, "y": 800 },
-    { "time": 9000, "x": 600, "y": 400 }
+    {
+      "type": "hitcircle",
+      "time": 1000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 2000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 4000,
+      "x": 600,
+      "y": 300
+    }
   ]
 }

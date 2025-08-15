@@ -31,6 +31,22 @@ available_songs = [
         "lyrics_path": "assets/lyrics/man_in_the_mirror.txt",
         "beatmap_path": "assets/beatmaps/man_in_the_mirror.json"
     },
+    {
+        "song_name": "Billie Jean",
+        "artist": "Michael Jackson",
+        "duration": "4:56",
+        "audio_path": "assets/songs/Billie_Jean.mp3",
+        "lyrics_path": "assets/lyrics/Billie_Jean.txt",
+        "beatmap_path": "assets/beatmaps/Billie_Jean.json"
+    },
+    {
+        "song_name": "Thriller",
+        "artist": "Michael Jackson",
+        "duration": "5:58",
+        "audio_path": "assets/songs/Thriller.mp3",
+        "lyrics_path": "assets/lyrics/Thriller.txt",
+        "beatmap_path": "assets/beatmaps/Thriller.json"
+    },
 ]
 
 # --- Frontend Routes ---

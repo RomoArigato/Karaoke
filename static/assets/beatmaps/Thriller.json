@@ -1,0 +1,27 @@
+{
+  "songName": "Thriller",
+  "artist": "Michael Jackson",
+  "hitObjects": [
+    {
+      "type": "hitcircle",
+      "time": 1000,
+      "x": 200,
+      "y": 300
+    },
+    {
+      "type": "slider",
+      "time": 2000,
+      "duration": 1500,
+      "startX": 400,
+      "startY": 200,
+      "endX": 800,
+      "endY": 500
+    },
+    {
+      "type": "hitcircle",
+      "time": 4000,
+      "x": 600,
+      "y": 300
+    }
+  ]
+}
